@@ -446,7 +446,9 @@
             if (response.ok) {
                 let result = await response.json();
                 if (result.record && result.record.footballData) {
-                    footballData = result.record.footballData;
+                    footballData.currentMatchday = result.record.footballData.currentMatchday || 1;
+                    footballData.matches = result.record.footballData.matches || {};
+                    // teams bleibt fest aus dem JS-Code erhalten!
                 }
             }
         } catch (e) {
@@ -646,14 +648,11 @@
 
         let currentMatchdayList = footballData.matches[footballData.currentMatchday] || [];
 
-        // Prüfen, ob für dieses Paar schon ein Spiel existiert
         let matchIndex = currentMatchdayList.findIndex(m => m.home === home && m.away === away);
 
         if (matchIndex !== -1) {
-            // Einzelnes Spiel aktualisieren
             currentMatchdayList[matchIndex] = { home, away, homeScore, awayScore };
         } else {
-            // Neues Einzelspiel hinzufügen
             currentMatchdayList.push({ home, away, homeScore, awayScore });
         }
 
