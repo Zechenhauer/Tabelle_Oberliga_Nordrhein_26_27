@@ -213,7 +213,7 @@
         .match-input-card {
             background: #0d1117;
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             margin-bottom: 10px;
         }
@@ -225,13 +225,14 @@
         }
         .form-grid {
             display: grid;
-            grid-template-columns: 3fr 3fr 1fr 1fr;
+            grid-template-columns: 3fr 3fr 1fr 1fr auto;
             gap: 8px;
             align-items: end;
         }
         @media (max-width: 700px) {
             .form-grid { grid-template-columns: 1fr 1fr; }
             .form-grid .form-group-team { grid-column: span 2; }
+            .form-grid .form-group-btn { grid-column: span 2; }
         }
         .form-group label {
             display: block;
@@ -265,6 +266,20 @@
             margin-top: 10px;
         }
         .btn:hover { background: var(--primary-hover); }
+
+        .btn-single-save {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.8rem;
+            height: 31px;
+            white-space: nowrap;
+        }
+        .btn-single-save:hover { background: var(--primary-hover); }
 
         .btn-danger {
             background: transparent;
@@ -338,7 +353,7 @@
             <!-- Formulare -->
         </div>
 
-        <button class="btn" onclick="saveAllMatches()">Alle Ergebnisse speichern</button>
+        <button class="btn" onclick="saveAllMatches()">Alle Spiele für diesen Spieltag speichern</button>
     </div>
 
     <!-- ADMIN SCHALTER UNTEN -->
@@ -614,10 +629,36 @@
                         <label>Tore G</label>
                         <input type="number" id="as_${idx}" class="form-control" value="${existing.awayScore !== undefined ? existing.awayScore : 0}" min="0">
                     </div>
+                    <div class="form-group form-group-btn">
+                        <button class="btn-single-save" onclick="saveSingleMatch(${idx})">💾 Speichern</button>
+                    </div>
                 </div>
             `;
             container.appendChild(card);
         });
+    }
+
+    function saveSingleMatch(idx) {
+        let home = document.getElementById(`home_${idx}`).value;
+        let away = document.getElementById(`away_${idx}`).value;
+        let homeScore = parseInt(document.getElementById(`hs_${idx}`).value) || 0;
+        let awayScore = parseInt(document.getElementById(`as_${idx}`).value) || 0;
+
+        let currentMatchdayList = footballData.matches[footballData.currentMatchday] || [];
+
+        // Prüfen, ob für dieses Paar schon ein Spiel existiert
+        let matchIndex = currentMatchdayList.findIndex(m => m.home === home && m.away === away);
+
+        if (matchIndex !== -1) {
+            // Einzelnes Spiel aktualisieren
+            currentMatchdayList[matchIndex] = { home, away, homeScore, awayScore };
+        } else {
+            // Neues Einzelspiel hinzufügen
+            currentMatchdayList.push({ home, away, homeScore, awayScore });
+        }
+
+        footballData.matches[footballData.currentMatchday] = currentMatchdayList;
+        saveAndSync();
     }
 
     function saveAllMatches() {
