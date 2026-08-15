@@ -39,13 +39,26 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* Header */
+        /* Header mit Logos links und rechts */
         .title-row {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+        }
+
+        .header-logo {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: contain;
+            border: 2px solid var(--accent-blue);
+            background: #ffffff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            padding: 2px;
+            box-sizing: border-box;
+            flex-shrink: 0;
         }
 
         h2 {
@@ -62,6 +75,12 @@
             color: var(--text-muted);
             margin-bottom: 10px;
             font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .header-logo { width: 42px; height: 42px; }
+            h2 { font-size: 1.3rem; }
+            .title-row { gap: 10px; }
         }
 
         /* Sektionen */
@@ -295,7 +314,9 @@
 
 <div class="container">
     <div class="title-row">
+        <img src="https://lh3.googleusercontent.com/d/1IaQuNKW718ZOezl-lcn6gNw3ndY3vJgf" alt="SV Scherpenberg Logo" class="header-logo">
         <h2>SV Scherpenberg 1921 e.V.</h2>
+        <img src="https://lh3.googleusercontent.com/d/1IaQuNKW718ZOezl-lcn6gNw3ndY3vJgf" alt="SV Scherpenberg Logo" class="header-logo">
     </div>
     <div class="subtitle" id="leagueSubtitle">Oberliga Niederrhein — Saison 2026/2027</div>
     <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">⚡ Datenpflege & Bereitstellung: Jürgen Schützendorf</div>
@@ -448,7 +469,6 @@
                 if (result.record && result.record.footballData) {
                     footballData.currentMatchday = result.record.footballData.currentMatchday || 1;
                     footballData.matches = result.record.footballData.matches || {};
-                    // teams bleibt fest aus dem JS-Code erhalten!
                 }
             }
         } catch (e) {
