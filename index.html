@@ -16,6 +16,8 @@
             --accent-blue: #64b5f6;
             --accent-green: #81c784;
             --accent-red: #ef5350;
+            --primary-gold: #d4af37;
+            --primary-gold-hover: #bda031;
         }
 
         * { box-sizing: border-box; }
@@ -39,7 +41,34 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* Header mit Logos links und rechts */
+        /* Header Navigation & Title */
+        .top-nav {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .btn-link {
+            background-color: var(--primary-gold);
+            color: #000000;
+            border: 1px solid var(--primary-gold);
+            padding: 6px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-link:hover {
+            background-color: var(--primary-gold-hover);
+            border-color: var(--primary-gold-hover);
+            color: #000000;
+        }
+
         .title-row {
             display: flex;
             align-items: center;
@@ -313,8 +342,11 @@
 <body>
 
 <div class="container">
+    <div class="top-nav">
+        <a href="https://zechenhauer.github.io/sv_scherpenberg/" target="_blank" class="btn-link">📅 Zum Live-Planer</a>
+    </div>
+
     <div class="title-row">
-        <img src="https://lh3.googleusercontent.com/d/1IaQuNKW718ZOezl-lcn6gNw3ndY3vJgf" alt="SV Scherpenberg Logo" class="header-logo">
         <h2>SV Scherpenberg 1921 e.V.</h2>
         <img src="https://lh3.googleusercontent.com/d/1IaQuNKW718ZOezl-lcn6gNw3ndY3vJgf" alt="SV Scherpenberg Logo" class="header-logo">
     </div>
