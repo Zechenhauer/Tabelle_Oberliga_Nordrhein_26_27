@@ -398,7 +398,7 @@
     <!-- ADMIN MODUS -->
     <div class="admin-card" id="adminCard">
         <div style="font-weight: bold; color: var(--accent-blue); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
-            <span>✏️ Ergebnisse für <span id="adminMatchdayLabel">Spieltag 1</span> erfassen</span>
+            <span>✏️ Paarungen / Ergebnisse für <span id="adminMatchdayLabel">Spieltag 1</span> erfassen</span>
             <span style="font-size: 0.7rem; color: var(--accent-green);">● Admin-Modus Aktiv</span>
         </div>
         
@@ -556,6 +556,10 @@
             let homeClass = isHomeSvs ? 'svs-highlight' : '';
             let awayClass = isAwaySvs ? 'svs-highlight' : '';
 
+            let resultText = (m.homeScore !== null && m.homeScore !== undefined && m.awayScore !== null && m.awayScore !== undefined)
+                ? `${m.homeScore} : ${m.awayScore}`
+                : `<span style="color: var(--text-muted); font-weight: normal; font-size: 0.8rem;">- : -</span>`;
+
             let deleteBtnHtml = isAdmin ? `<button class="btn-danger" onclick="deleteMatch(${idx})" title="Löschen" style="margin-left: 10px;">✕</button>` : '';
 
             let row = document.createElement('div');
@@ -563,7 +567,7 @@
             row.innerHTML = `
                 <div class="match-teams">
                     <div class="home-team ${homeClass}">${m.home}</div>
-                    <div class="match-result">${m.homeScore} : ${m.awayScore}</div>
+                    <div class="match-result">${resultText}</div>
                     <div class="away-team ${awayClass}">${m.away}</div>
                 </div>
                 ${deleteBtnHtml}
@@ -584,6 +588,8 @@
         Object.values(footballData.matches).forEach(matchdayList => {
             matchdayList.forEach(m => {
                 if (!stats[m.home] || !stats[m.away]) return;
+                // Nur gewertete Spiele mit Ergebnis berücksichtigen
+                if (m.homeScore === null || m.homeScore === undefined || m.awayScore === null || m.awayScore === undefined) return;
 
                 stats[m.home].played++;
                 stats[m.away].played++;
@@ -658,6 +664,9 @@
             let homeTeam = existing.home || pair.home;
             let awayTeam = existing.away || pair.away;
 
+            let hsVal = (existing.homeScore !== undefined && existing.homeScore !== null) ? existing.homeScore : '';
+            let asVal = (existing.awayScore !== undefined && existing.awayScore !== null) ? existing.awayScore : '';
+
             let card = document.createElement('div');
             card.className = 'match-input-card';
 
@@ -677,11 +686,11 @@
                     </div>
                     <div class="form-group">
                         <label>Tore H</label>
-                        <input type="number" id="hs_${idx}" class="form-control" value="${existing.homeScore !== undefined ? existing.homeScore : 0}" min="0">
+                        <input type="number" id="hs_${idx}" class="form-control" value="${hsVal}" placeholder="-" min="0">
                     </div>
                     <div class="form-group">
                         <label>Tore G</label>
-                        <input type="number" id="as_${idx}" class="form-control" value="${existing.awayScore !== undefined ? existing.awayScore : 0}" min="0">
+                        <input type="number" id="as_${idx}" class="form-control" value="${asVal}" placeholder="-" min="0">
                     </div>
                     <div class="form-group form-group-btn">
                         <button class="btn-single-save" onclick="saveSingleMatch(${idx})">💾 Speichern</button>
@@ -695,11 +704,13 @@
     function saveSingleMatch(idx) {
         let home = document.getElementById(`home_${idx}`).value;
         let away = document.getElementById(`away_${idx}`).value;
-        let homeScore = parseInt(document.getElementById(`hs_${idx}`).value) || 0;
-        let awayScore = parseInt(document.getElementById(`as_${idx}`).value) || 0;
+        let hsRaw = document.getElementById(`hs_${idx}`).value.trim();
+        let asRaw = document.getElementById(`as_${idx}`).value.trim();
+
+        let homeScore = hsRaw !== "" ? parseInt(hsRaw) : null;
+        let awayScore = asRaw !== "" ? parseInt(asRaw) : null;
 
         let currentMatchdayList = footballData.matches[footballData.currentMatchday] || [];
-
         let matchIndex = currentMatchdayList.findIndex(m => m.home === home && m.away === away);
 
         if (matchIndex !== -1) {
@@ -719,9 +730,11 @@
         for (let idx = 0; idx < defaultPairs.length; idx++) {
             let home = document.getElementById(`home_${idx}`).value;
             let away = document.getElementById(`away_${idx}`).value;
+            let hsRaw = document.getElementById(`hs_${idx}`).value.trim();
+            let asRaw = document.getElementById(`as_${idx}`).value.trim();
 
-            let homeScore = parseInt(document.getElementById(`hs_${idx}`).value) || 0;
-            let awayScore = parseInt(document.getElementById(`as_${idx}`).value) || 0;
+            let homeScore = hsRaw !== "" ? parseInt(hsRaw) : null;
+            let awayScore = asRaw !== "" ? parseInt(asRaw) : null;
 
             if (home !== away) {
                 newMatches.push({ home, away, homeScore, awayScore });
