@@ -340,7 +340,7 @@
 </div>
 
 <script>
-    const BIN_ID = '6a703ae9da38895dfeb258db';
+    const BIN_ID = '6a8effc1f5f4af5e29453562';
     const API_KEY = '$2a$10$1ynLUupN/Fka115SZVn9NurNpRBaWqrnH8qQXanu5c.cHPfriVgWS';
     const ADMIN_PIN = "1919";
     let isAdmin = false;
@@ -764,26 +764,29 @@
     }
 
     async function loadFromCloud() {
+        // 1. Lokales Backup zuerst laden
+        let localSaved = localStorage.getItem('svs_oberliga_data');
+        if (localSaved) {
+            try {
+                let parsed = JSON.parse(localSaved);
+                mergeMatches(parsed);
+            } catch (e) {}
+        }
+
+        // 2. Cloud abfragen
         try {
             let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
                 headers: { 'X-Master-Key': API_KEY }
             });
             if (response.ok) {
                 let result = await response.json();
-                if (result.record && result.record.Oberliga) {
-                    leagueData.currentMatchday = result.record.Oberliga.currentMatchday || 1;
-                    if (result.record.Oberliga.matches) {
-                        for (let mDay in result.record.Oberliga.matches) {
-                            if (leagueData.matches[mDay]) {
-                                result.record.Oberliga.matches[mDay].forEach((savedM, sIdx) => {
-                                    if (leagueData.matches[mDay][sIdx]) {
-                                        leagueData.matches[mDay][sIdx].homeScore = savedM.homeScore;
-                                        leagueData.matches[mDay][sIdx].awayScore = savedM.awayScore;
-                                    }
-                                });
-                            }
-                        }
-                    }
+                let record = result.record || {};
+                let cloudData = record.Oberliga || record.footballData || record;
+
+                if (cloudData && cloudData.matches) {
+                    leagueData.currentMatchday = cloudData.currentMatchday || leagueData.currentMatchday;
+                    mergeMatches(cloudData);
+                    localStorage.setItem('svs_oberliga_data', JSON.stringify(leagueData));
                 }
             }
         } catch (e) {
@@ -792,22 +795,46 @@
         renderAll();
     }
 
-    async function saveToCloud() {
-        try {
-            let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                headers: { 'X-Master-Key': API_KEY }
-            });
-            let allData = response.ok ? (await response.json()).record || {} : {};
-            allData.Oberliga = leagueData;
+    function mergeMatches(sourceData) {
+        if (!sourceData || !sourceData.matches) return;
+        for (let mDay in sourceData.matches) {
+            if (leagueData.matches[mDay]) {
+                sourceData.matches[mDay].forEach((savedM, sIdx) => {
+                    if (leagueData.matches[mDay][sIdx]) {
+                        if (savedM.homeScore !== undefined && savedM.homeScore !== null) {
+                            leagueData.matches[mDay][sIdx].homeScore = savedM.homeScore;
+                        } else {
+                            delete leagueData.matches[mDay][sIdx].homeScore;
+                        }
 
-            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                        if (savedM.awayScore !== undefined && savedM.awayScore !== null) {
+                            leagueData.matches[mDay][sIdx].awayScore = savedM.awayScore;
+                        } else {
+                            delete leagueData.matches[mDay][sIdx].awayScore;
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    async function saveToCloud() {
+        // IMMER sofort lokal im Browser sichern
+        localStorage.setItem('svs_oberliga_data', JSON.stringify(leagueData));
+
+        try {
+            let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Master-Key': API_KEY
                 },
-                body: JSON.stringify(allData)
+                body: JSON.stringify({ Oberliga: leagueData, footballData: leagueData })
             });
+
+            if (!response.ok) {
+                console.log('Fehler beim Cloud-Speichern');
+            }
         } catch (e) {
             console.log('Netzwerkfehler beim Speichern');
         }
@@ -946,8 +973,6 @@
         existingMatches.forEach((m, idx) => {
             let card = document.createElement('div');
             card.className = 'match-input-card';
-            let optHome = leagueData.teams.map(t => `<option value="${t}" ${t === m.home ? 'selected' : ''}>${t}</option>`).join('');
-            let optAway = leagueData.teams.map(t => `<option value="${t}" ${t === m.away ? 'selected' : ''}>${t}</option>`).join('');
 
             card.innerHTML = `
                 <div class="match-input-title" style="display: flex; justify-content: space-between; align-items: center;">
