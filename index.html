@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SV Scherpenberg 1921 — Oberliga Niederrhein</title>
+    <!-- Supabase Client Bibliothek laden -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --text-muted: #9e9e9e;
-            --border-color: #333333;
-            --primary: #990000;
-            --primary-hover: #b30000;
-            --accent-green: #81c784;
-            --accent-red: #ef5350;
-            --svs-orange: #ffa726;
-            --svs-blue: #42a5f5;
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --primary-blue: #0c2340;
+            --primary-blue-hover: #16365c;
+            --accent-green: #2ea043;
+            --accent-red: #f85149;
+            --svs-orange: #d4af37; /* Dezentes Gold/Gelb als Akzent für Schriften */
+            --svs-bright-blue: #58a6ff;
         }
 
         * { box-sizing: border-box; }
@@ -54,10 +56,10 @@
             height: 55px;
             border-radius: 50%;
             object-fit: contain;
-            border: 2px solid var(--svs-orange);
-            background: #0f172a;
+            border: 2px solid var(--svs-bright-blue);
+            background: #ffffff;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            padding: 4px;
+            padding: 2px;
             box-sizing: border-box;
             flex-shrink: 0;
         }
@@ -65,9 +67,12 @@
         h2 {
             text-align: center;
             margin: 0;
-            color: var(--svs-orange);
+            color: #ffffff;
             font-size: 1.6rem;
             font-weight: 800;
+        }
+        h2 span {
+            color: var(--svs-bright-blue);
         }
 
         .subtitle {
@@ -80,7 +85,7 @@
 
         /* Sektionen */
         .section-box {
-            background: #1a1a1a;
+            background: #0d1117;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
@@ -88,8 +93,9 @@
         }
 
         .section-header {
-            background-color: var(--primary);
-            color: #fff;
+            background-color: var(--primary-blue);
+            color: var(--svs-bright-blue);
+            border: 1px solid var(--border-color);
             padding: 10px 15px;
             font-weight: bold;
             text-align: center;
@@ -97,6 +103,7 @@
             font-size: 0.9rem;
             border-radius: 6px;
             margin-bottom: 15px;
+            letter-spacing: 0.5px;
         }
 
         .matchday-controls {
@@ -108,17 +115,18 @@
         }
 
         .matchday-btn {
-            background: #252525;
+            background: #21262d;
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 5px 12px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.2s;
         }
-        .matchday-btn:hover { background: var(--primary); }
+        .matchday-btn:hover { background: var(--primary-blue-hover); border-color: var(--svs-bright-blue); }
 
-        .svs-highlight { color: var(--svs-orange) !important; font-weight: bold; }
+        .svs-highlight { color: var(--svs-bright-blue) !important; font-weight: bold; }
 
         /* Tabellen-Ansicht */
         .table-container {
@@ -132,12 +140,13 @@
             font-size: 0.85rem;
         }
         th {
-            background-color: var(--primary);
-            color: #fff;
+            background-color: var(--primary-blue);
+            color: #ffffff;
             padding: 10px 8px;
             text-transform: uppercase;
             font-size: 0.75rem;
             white-space: nowrap;
+            border-bottom: 2px solid var(--border-color);
         }
         td {
             padding: 10px 8px;
@@ -147,18 +156,18 @@
         tr:hover { background-color: rgba(255,255,255,0.02); }
 
         tr.rank-first td {
-            background: rgba(129, 199, 132, 0.08);
-            color: #a5d6a7;
+            background: rgba(46, 160, 67, 0.12);
+            color: #3fb950;
         }
         tr.rank-last td {
-            background: rgba(239, 83, 80, 0.08);
-            color: #ef9a9a;
+            background: rgba(248, 81, 73, 0.12);
+            color: #f85149;
         }
 
         tr.svs-team-row td {
             font-weight: bold;
-            color: var(--svs-orange);
-            background: rgba(255, 167, 38, 0.08);
+            color: var(--svs-bright-blue);
+            background: rgba(88, 166, 255, 0.12);
         }
 
         /* Admin-Toggle-Button unten */
@@ -171,37 +180,31 @@
             border: 1px dashed var(--border-color);
             color: var(--text-muted);
             padding: 6px 12px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.2s;
         }
         .admin-toggle-btn:hover {
-            color: var(--svs-orange);
-            border-color: var(--svs-orange);
+            color: var(--svs-bright-blue);
+            border-color: var(--svs-bright-blue);
         }
 
         /* Admin / Eingabemasken */
         .admin-card {
-            background: #252525;
-            border: 1px solid var(--svs-orange);
+            background: #21262d;
+            border: 1px solid var(--svs-bright-blue);
             border-radius: 8px;
             padding: 15px;
             margin-top: 15px;
             display: none;
         }
         .match-input-card {
-            background: #1a1a1a;
-            border: 1px solid #333;
+            background: #161b22;
+            border: 1px solid var(--border-color);
             padding: 10px;
             border-radius: 6px;
             margin-bottom: 10px;
-        }
-        .match-input-title {
-            font-size: 0.8rem;
-            color: var(--svs-orange);
-            font-weight: bold;
-            margin-bottom: 8px;
         }
         .form-grid {
             display: grid;
@@ -223,28 +226,29 @@
         .form-control {
             width: 100%;
             padding: 6px;
-            background: #121212;
+            background: #0d1117;
             border: 1px solid var(--border-color);
             color: var(--text-color);
             border-radius: 4px;
             font-size: 0.8rem;
         }
-        .form-control:focus { border-color: var(--svs-orange); outline: none; }
+        .form-control:focus { border-color: var(--svs-bright-blue); outline: none; }
 
         .btn {
-            background: var(--svs-orange);
-            color: #000;
+            background: var(--svs-bright-blue);
+            color: #000000;
             border: none;
             padding: 10px 18px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
             font-size: 0.85rem;
             width: 100%;
             margin-top: 10px;
+            transition: background 0.2s;
         }
-        .btn:hover { background: #fb8c00; }
+        .btn:hover { background: #79c0ff; }
         
         .btn-danger {
             background: transparent;
@@ -261,7 +265,7 @@
 <div class="container">
     <div class="title-row">
         <img src="https://lh3.googleusercontent.com/d/1PB4X2QrrMlaRlajQEWDtJxRP2c6VTsI5" alt="SV Scherpenberg Logo" class="header-logo">
-        <h2>SV Scherpenberg 1921</h2>
+        <h2>SV Scherpenberg <span>1921</span></h2>
         <img src="https://lh3.googleusercontent.com/d/1PB4X2QrrMlaRlajQEWDtJxRP2c6VTsI5" alt="SV Scherpenberg Logo" class="header-logo">
     </div>
     <div class="subtitle" id="leagueSubtitle">Oberliga Niederrhein — Spielplan & Tabelle</div>
@@ -272,7 +276,7 @@
         <div class="section-header" id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</div>
         <div class="matchday-controls">
             <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger Spieltag</button>
-            <strong id="matchdayDisplay" style="color: var(--svs-orange); font-size: 1.1rem;">Spieltag 1</strong>
+            <strong id="matchdayDisplay" style="color: var(--svs-bright-blue); font-size: 1.1rem;">Spieltag 1</strong>
             <button class="matchday-btn" onclick="changeMatchday(1)">Nächster Spieltag ▶</button>
         </div>
         <div class="table-container">
@@ -317,14 +321,14 @@
             </table>
         </div>
         <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.75rem; color: var(--text-muted);">
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(129, 199, 132, 0.2); border-radius: 2px; display: inline-block;"></span> Aufstiegsplatz (Regionalliga)</div>
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(239, 83, 80, 0.2); border-radius: 2px; display: inline-block;"></span> Abstiegsplatz</div>
+            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(46, 160, 67, 0.2); border-radius: 2px; display: inline-block;"></span> Aufstiegsplatz (Regionalliga)</div>
+            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(248, 81, 73, 0.2); border-radius: 2px; display: inline-block;"></span> Abstiegsplatz</div>
         </div>
     </div>
 
     <!-- ERGEBNISSE EINTRAGEN / BEARBEITEN -->
     <div class="admin-card" id="adminCard">
-        <div style="font-weight: bold; color: var(--svs-orange); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-weight: bold; color: var(--svs-bright-blue); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
             <span>✏️ Ergebnisse für <span id="adminMatchdayLabel">Spieltag 1</span> erfassen</span>
             <span style="font-size: 0.7rem; color: var(--accent-green);">● Admin-Modus Aktiv</span>
         </div>
@@ -340,8 +344,13 @@
 </div>
 
 <script>
-    const BIN_ID = '6a8effc1f5f4af5e29453562';
-    const API_KEY = '$2a$10$1ynLUupN/Fka115SZVn9NurNpRBaWqrnH8qQXanu5c.cHPfriVgWS';
+    // ==========================================
+    // SUPABASE EINSTELLUNGEN
+    // ==========================================
+    const SUPABASE_URL = 'https://lhusylpjnujlqomougmg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_yXEueWILvAq-Vm2VfTuYyg_BIQeE1KK';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const ADMIN_PIN = "1921";
     let isAdmin = false;
 
@@ -368,60 +377,60 @@
             "1. FC Monheim"
         ],
         matches: {
-            1: [
-                { home: "Fortuna Düsseldorf II", away: "TSV Meerbusch", date: "2026-08-14", time: "19:30" },
-                { home: "SV Blau-Weiß Dingden", away: "VfL Jüchen-Garzweiler", date: "2026-08-14", time: "20:00" },
-                { home: "Sportfreunde Baumberg", away: "SV Sonsbeck", date: "2026-08-15", time: "16:00" },
-                { home: "Holzheimer SG", away: "KFC Uerdingen", date: "2026-08-15", time: "16:00" },
-                { home: "SSVg Velbert", away: "Wuppertaler SV", date: "2026-08-16", time: "15:00" },
-                { home: "SpVg Schonnebeck", away: "Ratingen 04/19", date: "2026-08-16", time: "15:00" },
-                { home: "SV Scherpenberg", away: "ETB Schwarz-Weiß Essen", date: "2026-08-16", time: "15:00" },
-                { home: "SC St. Tönis 1911/20", away: "1. Spvg. Solingen Wald 03", date: "2026-08-16", time: "15:30" },
-                { home: "FC Büderich", away: "1. FC Monheim", date: "2026-08-16", time: "15:30" }
+            "1": [
+                { "home": "Fortuna Düsseldorf II", "away": "TSV Meerbusch", "date": "2026-08-14", "time": "19:30", "homeScore": 3, "awayScore": 0 },
+                { "home": "SV Blau-Weiß Dingden", "away": "VfL Jüchen-Garzweiler", "date": "2026-08-14", "time": "20:00", "homeScore": 3, "awayScore": 0 },
+                { "home": "Sportfreunde Baumberg", "away": "SV Sonsbeck", "date": "2026-08-15", "time": "16:00", "homeScore": 1, "awayScore": 1 },
+                { "home": "Holzheimer SG", "away": "KFC Uerdingen", "date": "2026-08-15", "time": "16:00", "homeScore": 1, "awayScore": 5 },
+                { "home": "SSVg Velbert", "away": "Wuppertaler SV", "date": "2026-08-16", "time": "15:00", "homeScore": 1, "awayScore": 0 },
+                { "home": "SpVg Schonnebeck", "away": "Ratingen 04/19", "date": "2026-08-16", "time": "15:00", "homeScore": 2, "awayScore": 2 },
+                { "home": "SV Scherpenberg", "away": "ETB Schwarz-Weiß Essen", "date": "2026-08-16", "time": "15:00", "homeScore": 5, "awayScore": 3 },
+                { "home": "SC St. Tönis 1911/20", "away": "1. Spvg. Solingen Wald 03", "date": "2026-08-16", "time": "15:30", "homeScore": 3, "awayScore": 2 },
+                { "home": "FC Büderich", "away": "1. FC Monheim", "date": "2026-08-16", "time": "15:30", "homeScore": 2, "awayScore": 2 }
             ],
-            2: [
-                { home: "Wuppertaler SV", away: "SpVg Schonnebeck", date: "2026-08-21", time: "19:30" },
-                { home: "Ratingen 04/19", away: "FC Büderich", date: "2026-08-23", time: "15:00" },
-                { home: "1. FC Monheim", away: "SV Blau-Weiß Dingden", date: "2026-08-23", time: "15:00" },
-                { home: "TSV Meerbusch", away: "Sportfreunde Baumberg", date: "2026-08-23", time: "15:00" },
-                { home: "SV Sonsbeck", away: "SV Scherpenberg", date: "2026-08-23", time: "15:00" },
-                { home: "ETB Schwarz-Weiß Essen", away: "SSVg Velbert", date: "2026-08-23", time: "15:00" },
-                { home: "1. Spvg. Solingen Wald 03", away: "Holzheimer SG", date: "2026-08-23", time: "15:30" },
-                { home: "KFC Uerdingen", away: "Fortuna Düsseldorf II", date: "2026-08-23", time: "18:00" },
-                { home: "VfL Jüchen-Garzweiler", away: "SC St. Tönis 1911/20", date: "2026-09-09", time: "20:00" }
+            "2": [
+                { "home": "Wuppertaler SV", "away": "SpVg Schonnebeck", "date": "2026-08-21", "time": "19:30", "homeScore": 1, "awayScore": 3 },
+                { "home": "Ratingen 04/19", "away": "FC Büderich", "date": "2026-08-23", "time": "15:00", "homeScore": 3, "awayScore": 3 },
+                { "home": "1. FC Monheim", "away": "SV Blau-Weiß Dingden", "date": "2026-08-23", "time": "15:00", "homeScore": 1, "awayScore": 0 },
+                { "home": "TSV Meerbusch", "away": "Sportfreunde Baumberg", "date": "2026-08-23", "time": "15:00", "homeScore": 2, "awayScore": 4 },
+                { "home": "SV Sonsbeck", "away": "SV Scherpenberg", "date": "2026-08-23", "time": "15:00", "homeScore": 1, "awayScore": 1 },
+                { "home": "ETB Schwarz-Weiß Essen", "away": "SSVg Velbert", "date": "2026-08-23", "time": "15:00", "homeScore": 1, "awayScore": 4 },
+                { "home": "1. Spvg. Solingen Wald 03", "away": "Holzheimer SG", "date": "2026-08-23", "time": "15:30", "homeScore": 2, "awayScore": 1 },
+                { "home": "KFC Uerdingen", "away": "Fortuna Düsseldorf II", "date": "2026-08-23", "time": "18:00", "homeScore": 2, "awayScore": 1 },
+                { "home": "VfL Jüchen-Garzweiler", "away": "SC St. Tönis 1911/20", "date": "2026-09-09", "time": "20:00", "homeScore": 1, "awayScore": 3 }
             ],
-            3: [
-                { home: "Holzheimer SG", away: "VfL Jüchen-Garzweiler", date: "2026-08-27", time: "20:00" },
-                { home: "SSVg Velbert", away: "SpVg Schonnebeck", date: "2026-08-28", time: "19:30" },
-                { home: "Fortuna Düsseldorf II", away: "1. Spvg. Solingen Wald 03", date: "2026-08-28", time: "19:30" },
-                { home: "Sportfreunde Baumberg", away: "KFC Uerdingen", date: "2026-08-30", time: "15:00" },
-                { home: "SV Blau-Weiß Dingden", away: "Ratingen 04/19", date: "2026-08-30", time: "15:00" },
-                { home: "ETB Schwarz-Weiß Essen", away: "SV Sonsbeck", date: "2026-08-30", time: "15:00" },
-                { home: "SV Scherpenberg", away: "TSV Meerbusch", date: "2026-08-30", time: "15:00" },
-                { home: "SC St. Tönis 1911/20", away: "1. FC Monheim", date: "2026-08-30", time: "15:30" },
-                { home: "FC Büderich", away: "Wuppertaler SV", date: "2026-08-30", time: "15:30" }
+            "3": [
+                { "home": "Holzheimer SG", "away": "VfL Jüchen-Garzweiler", "date": "2026-08-27", "time": "20:00", "homeScore": 2, "awayScore": 4 },
+                { "home": "SSVg Velbert", "away": "SpVg Schonnebeck", "date": "2026-08-28", "time": "19:30", "homeScore": 3, "awayScore": 5 },
+                { "home": "Fortuna Düsseldorf II", "away": "1. Spvg. Solingen Wald 03", "date": "2026-08-28", "time": "19:30", "homeScore": 2, "awayScore": 0 },
+                { "home": "Sportfreunde Baumberg", "away": "KFC Uerdingen", "date": "2026-08-30", "time": "15:00", "homeScore": 2, "awayScore": 1 },
+                { "home": "SV Blau-Weiß Dingden", "away": "Ratingen 04/19", "date": "2026-08-30", "time": "15:00", "homeScore": 0, "awayScore": 0 },
+                { "home": "ETB Schwarz-Weiß Essen", "away": "SV Sonsbeck", "date": "2026-08-30", "time": "15:00", "homeScore": 1, "awayScore": 1 },
+                { "home": "SV Scherpenberg", "away": "TSV Meerbusch", "date": "2026-08-30", "time": "15:00", "homeScore": 0, "awayScore": 0 },
+                { "home": "SC St. Tönis 1911/20", "away": "1. FC Monheim", "date": "2026-08-30", "time": "15:30", "homeScore": 3, "awayScore": 3 },
+                { "home": "FC Büderich", "away": "Wuppertaler SV", "date": "2026-08-30", "time": "15:30", "homeScore": 1, "awayScore": 0 }
             ],
-            4: [
-                { home: "KFC Uerdingen", away: "SV Scherpenberg", date: "2026-09-04", time: "19:30" },
-                { home: "Wuppertaler SV", away: "SV Blau-Weiß Dingden", date: "2026-09-04", time: "19:30" },
-                { home: "Ratingen 04/19", away: "SC St. Tönis 1911/20", date: "2026-09-06", time: "15:00" },
-                { home: "1. FC Monheim", away: "Holzheimer SG", date: "2026-09-06", time: "15:00" },
-                { home: "VfL Jüchen-Garzweiler", away: "Fortuna Düsseldorf II", date: "2026-09-06", time: "15:00" },
-                { home: "TSV Meerbusch", away: "ETB Schwarz-Weiß Essen", date: "2026-09-06", time: "15:00" },
-                { home: "SV Sonsbeck", away: "SSVg Velbert", date: "2026-09-06", time: "15:00" },
-                { home: "SpVg Schonnebeck", away: "FC Büderich", date: "2026-09-06", time: "15:00" },
-                { home: "1. Spvg. Solingen Wald 03", away: "Sportfreunde Baumberg", date: "2026-09-06", time: "15:30" }
+            "4": [
+                { "home": "KFC Uerdingen", "away": "SV Scherpenberg", "date": "2026-09-04", "time": "19:30", "homeScore": 6, "awayScore": 1 },
+                { "home": "Wuppertaler SV", "away": "SV Blau-Weiß Dingden", "date": "2026-09-04", "time": "19:30", "homeScore": 0, "awayScore": 2 },
+                { "home": "Ratingen 04/19", "away": "SC St. Tönis 1911/20", "date": "2026-09-06", "time": "15:00", "homeScore": 1, "awayScore": 1 },
+                { "home": "1. FC Monheim", "away": "Holzheimer SG", "date": "2026-09-06", "time": "15:00", "homeScore": 5, "awayScore": 0 },
+                { "home": "VfL Jüchen-Garzweiler", "away": "Fortuna Düsseldorf II", "date": "2026-09-06", "time": "15:00", "homeScore": 0, "awayScore": 2 },
+                { "home": "TSV Meerbusch", "away": "ETB Schwarz-Weiß Essen", "date": "2026-09-06", "time": "15:00", "homeScore": 0, "awayScore": 1 },
+                { "home": "SV Sonsbeck", "away": "SSVg Velbert", "date": "2026-09-06", "time": "15:00", "homeScore": 4, "awayScore": 2 },
+                { "home": "SpVg Schonnebeck", "away": "FC Büderich", "date": "2026-09-06", "time": "15:00", "homeScore": 7, "awayScore": 1 },
+                { "home": "1. Spvg. Solingen Wald 03", "away": "Sportfreunde Baumberg", "date": "2026-09-06", "time": "15:30", "homeScore": 1, "awayScore": 4 }
             ],
-            5: [
-                { home: "SSVg Velbert", away: "FC Büderich", date: "2026-09-11", time: "19:30" },
-                { home: "Fortuna Düsseldorf II", away: "1. FC Monheim", date: "2026-09-11", time: "19:30" },
-                { home: "Holzheimer SG", away: "Ratingen 04/19", date: "2026-09-11", time: "20:00" },
-                { home: "Sportfreunde Baumberg", away: "VfL Jüchen-Garzweiler", date: "2026-09-13", time: "15:00" },
-                { home: "SV Blau-Weiß Dingden", away: "SpVg Schonnebeck", date: "2026-09-13", time: "15:00" },
-                { home: "SV Sonsbeck", away: "TSV Meerbusch", date: "2026-09-13", time: "15:00" },
-                { home: "ETB Schwarz-Weiß Essen", away: "KFC Uerdingen", date: "2026-09-13", time: "15:00" },
-                { home: "SV Scherpenberg", away: "1. Spvg. Solingen Wald 03", date: "2026-09-13", time: "15:00" },
-                { home: "SC St. Tönis 1911/20", away: "Wuppertaler SV", date: "2026-09-13", time: "15:30" }
+            "5": [
+                { "home": "SSVg Velbert", "away": "FC Büderich", "date": "2026-09-11", "time": "19:30", "homeScore": 2, "awayScore": 1 },
+                { "home": "Fortuna Düsseldorf II", "away": "1. FC Monheim", "date": "2026-09-11", "time": "19:30" },
+                { "home": "Holzheimer SG", "away": "Ratingen 04/19", "date": "2026-09-11", "time": "20:00", "homeScore": 3, "awayScore": 3 },
+                { "home": "Sportfreunde Baumberg", "away": "VfL Jüchen-Garzweiler", "date": "2026-09-13", "time": "15:00" },
+                { "home": "SV Blau-Weiß Dingden", "away": "SpVg Schonnebeck", "date": "2026-09-13", "time": "15:00" },
+                { "home": "SV Sonsbeck", "away": "TSV Meerbusch", "date": "2026-09-13", "time": "15:00" },
+                { "home": "ETB Schwarz-Weiß Essen", "away": "KFC Uerdingen", "date": "2026-09-13", "time": "15:00" },
+                { "home": "SV Scherpenberg", "away": "1. Spvg. Solingen Wald 03", "date": "2026-09-13", "time": "15:00", "homeScore": 1, "awayScore": 2 },
+                { "home": "SC St. Tönis 1911/20", "away": "Wuppertaler SV", "date": "2026-09-13", "time": "15:30" }
             ],
             6: [
                 { home: "Wuppertaler SV", away: "Holzheimer SG", date: "2026-09-19", time: "16:00" },
@@ -764,33 +773,24 @@
     }
 
     async function loadFromCloud() {
-        // 1. Lokales Backup zuerst laden
-        let localSaved = localStorage.getItem('svs_oberliga_data');
-        if (localSaved) {
-            try {
-                let parsed = JSON.parse(localSaved);
-                mergeMatches(parsed);
-            } catch (e) {}
-        }
-
-        // 2. Cloud abfragen
         try {
-            let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                headers: { 'X-Master-Key': API_KEY }
-            });
-            if (response.ok) {
-                let result = await response.json();
-                let record = result.record || {};
-                let cloudData = record.Oberliga || record.footballData || record;
+            let { data, error } = await supabaseClient
+                .from('oberliga_table')
+                .select('payload')
+                .eq('id', 'season_data')
+                .single();
 
+            if (data && data.payload) {
+                let cloudData = data.payload;
                 if (cloudData && cloudData.matches) {
                     leagueData.currentMatchday = cloudData.currentMatchday || leagueData.currentMatchday;
                     mergeMatches(cloudData);
-                    localStorage.setItem('svs_oberliga_data', JSON.stringify(leagueData));
                 }
+            } else {
+                saveToCloud();
             }
         } catch (e) {
-            console.log('Netzwerkfehler beim Laden');
+            console.log('Fehler beim Laden aus Supabase:', e);
         }
         renderAll();
     }
@@ -803,14 +803,9 @@
                     if (leagueData.matches[mDay][sIdx]) {
                         if (savedM.homeScore !== undefined && savedM.homeScore !== null) {
                             leagueData.matches[mDay][sIdx].homeScore = savedM.homeScore;
-                        } else {
-                            delete leagueData.matches[mDay][sIdx].homeScore;
                         }
-
                         if (savedM.awayScore !== undefined && savedM.awayScore !== null) {
                             leagueData.matches[mDay][sIdx].awayScore = savedM.awayScore;
-                        } else {
-                            delete leagueData.matches[mDay][sIdx].awayScore;
                         }
                     }
                 });
@@ -819,24 +814,17 @@
     }
 
     async function saveToCloud() {
-        // IMMER sofort lokal im Browser sichern
-        localStorage.setItem('svs_oberliga_data', JSON.stringify(leagueData));
-
         try {
-            let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': API_KEY
-                },
-                body: JSON.stringify({ Oberliga: leagueData, footballData: leagueData })
-            });
+            let { error } = await supabaseClient
+                .from('oberliga_table')
+                .upsert({ id: 'season_data', payload: leagueData });
 
-            if (!response.ok) {
-                console.log('Fehler beim Cloud-Speichern');
+            if (error) {
+                console.error('Fehler beim Speichern in Supabase:', error);
+                alert("Fehler beim Speichern in Supabase!");
             }
         } catch (e) {
-            console.log('Netzwerkfehler beim Speichern');
+            console.error('Netzwerkfehler:', e);
         }
     }
 
@@ -881,7 +869,7 @@
 
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="font-size: 0.8rem; color: var(--svs-orange);">${formattedDate}${timeStr}</td>
+                <td style="font-size: 0.8rem; color: var(--svs-bright-blue);">${formattedDate}${timeStr}</td>
                 <td class="${homeClass}" style="text-align: right;">${m.home}</td>
                 <td style="text-align: center;">${resultDisplay}</td>
                 <td class="${awayClass}">${m.away}</td>
@@ -975,19 +963,17 @@
             card.className = 'match-input-card';
 
             card.innerHTML = `
-                <div class="match-input-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.8rem; color: var(--svs-bright-blue); font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <span>Partie ${idx + 1}</span>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">${m.date ? m.date.split('-').reverse().join('.') : ''} ${m.time || ''} Uhr</div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">${m.date ? m.date.split('-').reverse().join('.') : ''} ${m.time || ''} Uhr</span>
                 </div>
                 <div class="form-grid">
                     <div class="form-group form-group-team">
-                        <label>${m.home}</label>
-                        <input type="hidden" id="home_${idx}" value="${m.home}">
+                        <label>Heim</label>
                         <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-color);">${m.home}</span>
                     </div>
                     <div class="form-group form-group-team">
-                        <label>${m.away}</label>
-                        <input type="hidden" id="away_${idx}" value="${m.away}">
+                        <label>Gast</label>
                         <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-color);">${m.away}</span>
                     </div>
                     <div class="form-group">
@@ -1009,7 +995,7 @@
 
         for (let idx = 0; idx < existingMatches.length; idx++) {
             let hsVal = document.getElementById(`hs_${idx}`).value;
-            let asVal = document.getElementById(`as_${idx}`).value;
+            let asVal = document.getElementById('as_' + idx).value;
 
             if (hsVal !== '' && asVal !== '') {
                 existingMatches[idx].homeScore = parseInt(hsVal);
