@@ -17,7 +17,6 @@
             --primary-blue-hover: #16365c;
             --accent-green: #2ea043;
             --accent-red: #f85149;
-            --svs-orange: #d4af37; /* Dezentes Gold/Gelb als Akzent für Schriften */
             --svs-bright-blue: #58a6ff;
         }
 
@@ -42,36 +41,43 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* Header mit Logo links und rechts */
-        .title-row {
+        /* GROSSES VOLLBILD-BANNER */
+        .banner-box {
+            background: #000000;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .banner-image {
+            width: 100%;
+            height: auto;
+            max-height: 450px;
+            object-fit: cover;
+            display: block;
+        }
+        .banner-footer {
+            background: #0d1117;
+            border-top: 1px solid var(--border-color);
+            padding: 15px;
+            text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 5px;
+            flex-wrap: wrap;
         }
-
-        .header-logo {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            object-fit: contain;
-            border: 2px solid var(--svs-bright-blue);
-            background: #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            padding: 2px;
-            box-sizing: border-box;
-            flex-shrink: 0;
-        }
-
-        h2 {
-            text-align: center;
-            margin: 0;
+        .banner-title {
             color: #ffffff;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: 800;
+            margin: 0;
+            letter-spacing: 0.5px;
         }
-        h2 span {
+        .banner-title span {
             color: var(--svs-bright-blue);
         }
 
@@ -79,7 +85,7 @@
             text-align: center;
             font-size: 0.9rem;
             color: var(--text-muted);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
         }
 
@@ -104,6 +110,104 @@
             border-radius: 6px;
             margin-bottom: 15px;
             letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-modal-open {
+            background: var(--svs-bright-blue);
+            color: #000000;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .btn-modal-open:hover { background: #79c0ff; }
+
+        /* MODAL / POPUP STILE */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+        .modal-card {
+            background: #161b22;
+            border: 1px solid var(--svs-bright-blue);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .modal-body {
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .svs-badge-win {
+            background: rgba(46, 160, 67, 0.2);
+            color: #3fb950;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(46, 160, 67, 0.4);
+            font-weight: bold;
+        }
+        .svs-badge-draw {
+            background: rgba(227, 179, 64, 0.2);
+            color: #e3b341;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(227, 179, 64, 0.4);
+            font-weight: bold;
+        }
+        .svs-badge-loss {
+            background: rgba(248, 81, 73, 0.2);
+            color: #f85149;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(248, 81, 73, 0.4);
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-top: 4px;
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
         .matchday-controls {
@@ -128,7 +232,6 @@
 
         .svs-highlight { color: var(--svs-bright-blue) !important; font-weight: bold; }
 
-        /* Tabellen-Ansicht */
         .table-container {
             width: 100%;
             overflow-x: auto;
@@ -263,13 +366,25 @@
 <body>
 
 <div class="container">
-    <div class="title-row">
-        <img src="https://lh3.googleusercontent.com/d/1PB4X2QrrMlaRlajQEWDtJxRP2c6VTsI5" alt="SV Scherpenberg Logo" class="header-logo">
-        <h2>SV Scherpenberg <span>1921</span></h2>
-        <img src="https://lh3.googleusercontent.com/d/1PB4X2QrrMlaRlajQEWDtJxRP2c6VTsI5" alt="SV Scherpenberg Logo" class="header-logo">
+    <!-- GROSSES VOLLBILD-BANNER ALS KACHEL -->
+    <div class="banner-box">
+        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner%20sv%20scherpenberg.png" alt="SV Scherpenberg Banner" class="banner-image">
+        <div class="banner-footer">
+            <h1 class="banner-title">SV Scherpenberg <span>1921</span></h1>
+        </div>
     </div>
+
     <div class="subtitle" id="leagueSubtitle">Oberliga Niederrhein — Spielplan & Tabelle</div>
     <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">⚡ Web-App & Management: Jürgen Schützendorf</div>
+
+    <!-- SV SCHERPENBERG — SAISON-AUSWERTUNG -->
+    <div class="section-box">
+        <div class="section-header">
+            <span>SV Scherpenberg — Saison-Auswertung</span>
+            <button class="btn-modal-open" onclick="openSvsMatchesModal()">📅 Alle Spiele Scherpenberg</button>
+        </div>
+        <div class="stats-grid" id="svsStatsGrid"></div>
+    </div>
 
     <!-- SPIELTAGS-TABELLE (Spiele & Ergebnisse oben) -->
     <div class="section-box">
@@ -340,6 +455,33 @@
     <!-- ADMIN SCHALTER UNTEN -->
     <div class="admin-toggle-wrapper">
         <button class="admin-toggle-btn" onclick="toggleAdminMode()">⚙️ Admin-Zugang</button>
+    </div>
+</div>
+
+<!-- POPUP MODAL: ALLE SPIELE SV SCHERPENBERG -->
+<div class="modal-overlay" id="svsMatchesModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">📅 SV Scherpenberg — Alle Saisonspiele</div>
+            <button class="btn-danger" onclick="closeSvsMatchesModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">ST</th>
+                            <th style="width: 90px;">Termin</th>
+                            <th style="text-align: right;">Heim</th>
+                            <th style="text-align: center; width: 70px;">Erg.</th>
+                            <th>Gast</th>
+                        </tr>
+                    </thead>
+                    <tbody id="svsMatchesModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 15px;" onclick="closeSvsMatchesModal()">Schließen</button>
     </div>
 </div>
 
@@ -840,6 +982,7 @@
         
         renderMatchdayTable();
         renderTable();
+        renderSvsStats();
         if (isAdmin) renderInputForm();
     }
 
@@ -877,6 +1020,102 @@
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    function renderSvsStats() {
+        let played = 0, won = 0, draw = 0, lost = 0, goalsFor = 0, goalsAgainst = 0, points = 0;
+
+        Object.values(leagueData.matches).forEach(matchList => {
+            if (!Array.isArray(matchList)) return;
+            matchList.forEach(m => {
+                let isHome = m.home === "SV Scherpenberg";
+                let isAway = m.away === "SV Scherpenberg";
+                if (!isHome && !isAway) return;
+
+                if (m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null) {
+                    played++;
+                    let myG = isHome ? m.homeScore : m.awayScore;
+                    let oppG = isHome ? m.awayScore : m.homeScore;
+                    goalsFor += myG;
+                    goalsAgainst += oppG;
+
+                    if (myG > oppG) { won++; points += 3; }
+                    else if (myG === oppG) { draw++; points += 1; }
+                    else { lost++; }
+                }
+            });
+        });
+
+        document.getElementById('svsStatsGrid').innerHTML = `
+            <div class="stat-card"><div class="stat-label">Spiele</div><div class="stat-value">${played}</div></div>
+            <div class="stat-card"><div class="stat-label">Siege</div><div class="stat-value" style="color: #3fb950;">${won}</div></div>
+            <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: #e3b341;">${draw}</div></div>
+            <div class="stat-card"><div class="stat-label">Niederlagen</div><div class="stat-value" style="color: #f85149;">${lost}</div></div>
+            <div class="stat-card"><div class="stat-label">Tore</div><div class="stat-value">${goalsFor}:${goalsAgainst}</div></div>
+            <div class="stat-card"><div class="stat-label">Punkte</div><div class="stat-value">${points}</div></div>
+        `;
+    }
+
+    function openSvsMatchesModal() {
+        let modalBody = document.getElementById('svsMatchesModalBody');
+        modalBody.innerHTML = '';
+
+        let svsMatches = [];
+        for (let mDay in leagueData.matches) {
+            leagueData.matches[mDay].forEach(m => {
+                if (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") {
+                    svsMatches.push({ matchday: parseInt(mDay), ...m });
+                }
+            });
+        }
+        svsMatches.sort((a, b) => a.matchday - b.matchday);
+
+        if (svsMatches.length === 0) {
+            modalBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele gefunden.</td></tr>`;
+        } else {
+            svsMatches.forEach(m => {
+                let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
+                let isHome = m.home === "SV Scherpenberg";
+                
+                let badgeClass = '';
+                if (hasResult) {
+                    let svsGoals = isHome ? m.homeScore : m.awayScore;
+                    let oppGoals = isHome ? m.awayScore : m.homeScore;
+
+                    if (svsGoals > oppGoals) badgeClass = 'svs-badge-win';
+                    else if (svsGoals === oppGoals) badgeClass = 'svs-badge-draw';
+                    else badgeClass = 'svs-badge-loss';
+                }
+
+                let homeDisplay = m.home;
+                let awayDisplay = m.away;
+
+                if (isHome) {
+                    homeDisplay = `<span class="${badgeClass}">${m.home}</span>`;
+                } else {
+                    awayDisplay = `<span class="${badgeClass}">${m.away}</span>`;
+                }
+
+                let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color:var(--text-muted);">-:-</span>`;
+                let formattedDate = m.date ? m.date.split('-').reverse().join('.') : 'Offen';
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; color: var(--svs-bright-blue); font-weight: bold;">ST ${m.matchday}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
+                    <td style="text-align: right;">${homeDisplay}</td>
+                    <td style="text-align: center;">${resultDisplay}</td>
+                    <td>${awayDisplay}</td>
+                `;
+                modalBody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('svsMatchesModal').style.display = 'flex';
+    }
+
+    function closeSvsMatchesModal() {
+        document.getElementById('svsMatchesModal').style.display = 'none';
     }
 
     function renderTable() {
@@ -995,7 +1234,7 @@
 
         for (let idx = 0; idx < existingMatches.length; idx++) {
             let hsVal = document.getElementById(`hs_${idx}`).value;
-            let asVal = document.getElementById('as_' + idx).value;
+            let asVal = document.getElementById(`as_${idx}`).value;
 
             if (hsVal !== '' && asVal !== '') {
                 existingMatches[idx].homeScore = parseInt(hsVal);
@@ -1007,6 +1246,7 @@
         }
 
         saveAndSync();
+        alert("Ergebnisse erfolgreich gespeichert!");
     }
 
     function deleteMatchResult(idx) {
@@ -1021,6 +1261,13 @@
     function saveAndSync() {
         renderAll();
         saveToCloud();
+    }
+
+    window.onclick = function(e) {
+        let modal = document.getElementById('svsMatchesModal');
+        if (e.target === modal) {
+            closeSvsMatchesModal();
+        }
     }
 
     loadFromCloud();
