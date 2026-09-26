@@ -273,6 +273,22 @@
             background: rgba(88, 166, 255, 0.12);
         }
 
+        /* Team Logos in Tabellen */
+        .team-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .team-cell.right {
+            justify-content: flex-end;
+        }
+        .team-logo {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
         /* Admin-Toggle-Button unten */
         .admin-toggle-wrapper {
             text-align: right;
@@ -487,7 +503,7 @@
 
 <script>
     // ==========================================
-    // SUPABASE EINSTELLUNGEN
+    // SUPABASE EINSTELLUNGEN & VEREINSLOGOS
     // ==========================================
     const SUPABASE_URL = 'https://lhusylpjnujlqomougmg.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_yXEueWILvAq-Vm2VfTuYyg_BIQeE1KK';
@@ -495,6 +511,49 @@
 
     const ADMIN_PIN = "1921";
     let isAdmin = false;
+
+    // Zuordnung der Supabase-Logos zu den jeweiligen Vereinsnamen
+    const VEREINS_LOGOS = {
+        "SV Scherpenberg": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/scherpenberg.png",
+        "ETB Schwarz-Weiß Essen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/swessen.png",
+        "SV Sonsbeck": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/sonsberg.png",
+        "TSV Meerbusch": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/meerbusch.png",
+        "KFC Uerdingen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/uerdingen.png",
+        "1. Spvg. Solingen Wald 03": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/solingen.png",
+        "VfL Jüchen-Garzweiler": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/juechen.png",
+        "1. FC Monheim": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/monheim.png",
+        "Ratingen 04/19": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/ratingen.png",
+        "Wuppertaler SV": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/wuppertal.png",
+        "SpVg Schonnebeck": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/schonnebeck.png",
+        "FC Büderich": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/buederich.png",
+        "SV Blau-Weiß Dingden": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/dingden.png",
+        "SC St. Tönis 1911/20": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/toenis.png",
+        "Holzheimer SG": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/holzheim.png",
+        "Fortuna Düsseldorf II": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/duesseldorf.png",
+        "Sportfreunde Baumberg": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/baumberg.png",
+        "SSVg Velbert": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/velbert.png"
+    };
+
+    function getTeamHtml(teamName, alignRight = false, customClass = "") {
+        const logoUrl = VEREINS_LOGOS[teamName] || "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/scherpenberg.png";
+        const alignmentClass = alignRight ? "team-cell right" : "team-cell";
+        
+        if (alignRight) {
+            return `
+                <div class="${alignmentClass}">
+                    <span class="${customClass}">${teamName}</span>
+                    <img src="${logoUrl}" alt="${teamName}" class="team-logo">
+                </div>
+            `;
+        } else {
+            return `
+                <div class="${alignmentClass}">
+                    <img src="${logoUrl}" alt="${teamName}" class="team-logo">
+                    <span class="${customClass}">${teamName}</span>
+                </div>
+            `;
+        }
+    }
 
     let leagueData = {
         currentMatchday: 1,
@@ -1013,9 +1072,9 @@
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-size: 0.8rem; color: var(--svs-bright-blue);">${formattedDate}${timeStr}</td>
-                <td class="${homeClass}" style="text-align: right;">${m.home}</td>
+                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass)}</td>
                 <td style="text-align: center;">${resultDisplay}</td>
-                <td class="${awayClass}">${m.away}</td>
+                <td>${getTeamHtml(m.away, false, awayClass)}</td>
                 <td style="text-align: center;">${deleteBtn}</td>
             `;
             tbody.appendChild(tr);
@@ -1087,13 +1146,13 @@
                     else badgeClass = 'svs-badge-loss';
                 }
 
-                let homeDisplay = m.home;
-                let awayDisplay = m.away;
+                let homeHtml = getTeamHtml(m.home, true);
+                let awayHtml = getTeamHtml(m.away, false);
 
-                if (isHome) {
-                    homeDisplay = `<span class="${badgeClass}">${m.home}</span>`;
-                } else {
-                    awayDisplay = `<span class="${badgeClass}">${m.away}</span>`;
+                if (isHome && hasResult) {
+                    homeHtml = `<div class="team-cell right"><span class="${badgeClass}">${m.home}</span><img src="${VEREINS_LOGOS[m.home]}" class="team-logo"></div>`;
+                } else if (!isHome && hasResult) {
+                    awayHtml = `<div class="team-cell"><img src="${VEREINS_LOGOS[m.away]}" class="team-logo"><span class="${badgeClass}">${m.away}</span></div>`;
                 }
 
                 let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color:var(--text-muted);">-:-</span>`;
@@ -1103,9 +1162,9 @@
                 tr.innerHTML = `
                     <td style="text-align: center; color: var(--svs-bright-blue); font-weight: bold;">ST ${m.matchday}</td>
                     <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
-                    <td style="text-align: right;">${homeDisplay}</td>
+                    <td style="text-align: right;">${homeHtml}</td>
                     <td style="text-align: center;">${resultDisplay}</td>
-                    <td>${awayDisplay}</td>
+                    <td>${awayHtml}</td>
                 `;
                 modalBody.appendChild(tr);
             });
@@ -1174,7 +1233,7 @@
 
             tr.innerHTML = `
                 <td><strong>${idx + 1}.</strong></td>
-                <td>${s.name}</td>
+                <td>${getTeamHtml(s.name, false)}</td>
                 <td style="text-align: center;">${s.played}</td>
                 <td style="text-align: center;">${s.won}</td>
                 <td style="text-align: center;">${s.draw}</td>
@@ -1209,11 +1268,11 @@
                 <div class="form-grid">
                     <div class="form-group form-group-team">
                         <label>Heim</label>
-                        <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-color);">${m.home}</span>
+                        <div style="font-size: 0.8rem; font-weight: bold;">${getTeamHtml(m.home, false)}</div>
                     </div>
                     <div class="form-group form-group-team">
                         <label>Gast</label>
-                        <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-color);">${m.away}</span>
+                        <div style="font-size: 0.8rem; font-weight: bold;">${getTeamHtml(m.away, false)}</div>
                     </div>
                     <div class="form-group">
                         <label>Tore Heim</label>
