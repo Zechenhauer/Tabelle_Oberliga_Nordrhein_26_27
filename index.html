@@ -117,6 +117,12 @@
             gap: 10px;
         }
 
+        .header-btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .btn-modal-open {
             background: var(--svs-bright-blue);
             color: #000000;
@@ -329,9 +335,9 @@
         .match-input-card {
             background: #161b22;
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .form-grid {
             display: grid;
@@ -405,7 +411,10 @@
     <div class="section-box">
         <div class="section-header">
             <span>SV Scherpenberg — Saison-Auswertung</span>
-            <button class="btn-modal-open" onclick="openTeamMatchesModal('SV Scherpenberg')">📅 Alle Spiele Scherpenberg</button>
+            <div class="header-btn-group">
+                <button class="btn-modal-open" onclick="openTeamMatchesModal('SV Scherpenberg')">📅 Alle Spiele</button>
+                <button class="btn-modal-open" onclick="openSvsScorersModal()">⚽ Torschützen</button>
+            </div>
         </div>
         <div class="stats-grid" id="svsStatsGrid"></div>
     </div>
@@ -475,12 +484,12 @@
     <!-- ERGEBNISSE EINTRAGEN / BEARBEITEN -->
     <div class="admin-card" id="adminCard">
         <div style="font-weight: bold; color: var(--svs-bright-blue); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
-            <span>✏️ Ergebnisse für <span id="adminMatchdayLabel">Spieltag 1</span> erfassen</span>
+            <span>✏️ Ergebnisse & Torschützen für <span id="adminMatchdayLabel">Spieltag 1</span> erfassen</span>
             <span style="font-size: 0.7rem; color: var(--accent-green);">● Admin-Modus Aktiv</span>
         </div>
         
         <div id="matchInputsContainer"></div>
-        <button class="btn" onclick="saveAllMatches()">Alle Ergebnisse für diesen Spieltag speichern</button>
+        <button class="btn" onclick="saveAllMatches()">Alle Ergebnisse & Torschützen speichern</button>
     </div>
 
     <!-- ADMIN SCHALTER UNTEN -->
@@ -513,6 +522,31 @@
             </div>
         </div>
         <button class="btn" style="margin-top: 15px;" onclick="closeTeamMatchesModal()">Schließen</button>
+    </div>
+</div>
+
+<!-- POPUP MODAL: SV SCHERPENBERG TORSCHÜTZEN -->
+<div class="modal-overlay" id="svsScorersModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">⚽ SV Scherpenberg — Torschützenliste</div>
+            <button class="btn-danger" onclick="closeSvsScorersModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">Pl.</th>
+                            <th>Spieler</th>
+                            <th style="text-align: center; width: 80px;">Tore</th>
+                        </tr>
+                    </thead>
+                    <tbody id="svsScorersModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 15px;" onclick="closeSvsScorersModal()">Schließen</button>
     </div>
 </div>
 
@@ -602,7 +636,7 @@
                 { "home": "Holzheimer SG", "away": "KFC Uerdingen", "date": "2026-08-15", "time": "16:00", "homeScore": 1, "awayScore": 5 },
                 { "home": "SSVg Velbert", "away": "Wuppertaler SV", "date": "2026-08-16", "time": "15:00", "homeScore": 1, "awayScore": 0 },
                 { "home": "SpVg Schonnebeck", "away": "Ratingen 04/19", "date": "2026-08-16", "time": "15:00", "homeScore": 2, "awayScore": 2 },
-                { "home": "SV Scherpenberg", "away": "ETB Schwarz-Weiß Essen", "date": "2026-08-16", "time": "15:00", "homeScore": 5, "awayScore": 3 },
+                { "home": "SV Scherpenberg", "away": "ETB Schwarz-Weiß Essen", "date": "2026-08-16", "time": "15:00", "homeScore": 5, "awayScore": 3, "scorers": "Müller (2), Schmidt, Weber, Wagner" },
                 { "home": "SC St. Tönis 1911/20", "away": "1. Spvg. Solingen Wald 03", "date": "2026-08-16", "time": "15:30", "homeScore": 3, "awayScore": 2 },
                 { "home": "FC Büderich", "away": "1. FC Monheim", "date": "2026-08-16", "time": "15:30", "homeScore": 2, "awayScore": 2 }
             ],
@@ -611,7 +645,7 @@
                 { "home": "Ratingen 04/19", "away": "FC Büderich", "date": "2026-08-23", "time": "15:00", "homeScore": 3, "awayScore": 3 },
                 { "home": "1. FC Monheim", "away": "SV Blau-Weiß Dingden", "date": "2026-08-23", "time": "15:00", "homeScore": 1, "awayScore": 0 },
                 { "home": "TSV Meerbusch", "away": "Sportfreunde Baumberg", "date": "2026-08-23", "time": "15:00", "homeScore": 2, "awayScore": 4 },
-                { "home": "SV Sonsbeck", "away": "SV Scherpenberg", "date": "2026-08-23", "time": "15:00", "homeScore": 1, "awayScore": 1 },
+                { "home": "SV Sonsbeck", "away": "SV Scherpenberg", "date": "2026-08-23", "time": "15:00", "homeScore": 1, "awayScore": 1, "scorers": "Müller" },
                 { "home": "ETB Schwarz-Weiß Essen", "away": "SSVg Velbert", "date": "2026-08-23", "time": "15:00", "homeScore": 1, "awayScore": 4 },
                 { "home": "1. Spvg. Solingen Wald 03", "away": "Holzheimer SG", "date": "2026-08-23", "time": "15:30", "homeScore": 2, "awayScore": 1 },
                 { "home": "KFC Uerdingen", "away": "Fortuna Düsseldorf II", "date": "2026-08-23", "time": "18:00", "homeScore": 2, "awayScore": 1 },
@@ -624,12 +658,12 @@
                 { "home": "Sportfreunde Baumberg", "away": "KFC Uerdingen", "date": "2026-08-30", "time": "15:00", "homeScore": 2, "awayScore": 1 },
                 { "home": "SV Blau-Weiß Dingden", "away": "Ratingen 04/19", "date": "2026-08-30", "time": "15:00", "homeScore": 0, "awayScore": 0 },
                 { "home": "ETB Schwarz-Weiß Essen", "away": "SV Sonsbeck", "date": "2026-08-30", "time": "15:00", "homeScore": 1, "awayScore": 1 },
-                { "home": "SV Scherpenberg", "away": "TSV Meerbusch", "date": "2026-08-30", "time": "15:00", "homeScore": 0, "awayScore": 0 },
+                { "home": "SV Scherpenberg", "away": "TSV Meerbusch", "date": "2026-08-30", "time": "15:00", "homeScore": 0, "awayScore": 0, "scorers": "" },
                 { "home": "SC St. Tönis 1911/20", "away": "1. FC Monheim", "date": "2026-08-30", "time": "15:30", "homeScore": 3, "awayScore": 3 },
                 { "home": "FC Büderich", "away": "Wuppertaler SV", "date": "2026-08-30", "time": "15:30", "homeScore": 1, "awayScore": 0 }
             ],
             "4": [
-                { "home": "KFC Uerdingen", "away": "SV Scherpenberg", "date": "2026-09-04", "time": "19:30", "homeScore": 6, "awayScore": 1 },
+                { "home": "KFC Uerdingen", "away": "SV Scherpenberg", "date": "2026-09-04", "time": "19:30", "homeScore": 6, "awayScore": 1, "scorers": "Schmidt" },
                 { "home": "Wuppertaler SV", "away": "SV Blau-Weiß Dingden", "date": "2026-09-04", "time": "19:30", "homeScore": 0, "awayScore": 2 },
                 { "home": "Ratingen 04/19", "away": "SC St. Tönis 1911/20", "date": "2026-09-06", "time": "15:00", "homeScore": 1, "awayScore": 1 },
                 { "home": "1. FC Monheim", "away": "Holzheimer SG", "date": "2026-09-06", "time": "15:00", "homeScore": 5, "awayScore": 0 },
@@ -647,7 +681,7 @@
                 { "home": "SV Blau-Weiß Dingden", "away": "SpVg Schonnebeck", "date": "2026-09-13", "time": "15:00" },
                 { "home": "SV Sonsbeck", "away": "TSV Meerbusch", "date": "2026-09-13", "time": "15:00" },
                 { "home": "ETB Schwarz-Weiß Essen", "away": "KFC Uerdingen", "date": "2026-09-13", "time": "15:00" },
-                { "home": "SV Scherpenberg", "away": "1. Spvg. Solingen Wald 03", "date": "2026-09-13", "time": "15:00", "homeScore": 1, "awayScore": 2 },
+                { "home": "SV Scherpenberg", "away": "1. Spvg. Solingen Wald 03", "date": "2026-09-13", "time": "15:00", "homeScore": 1, "awayScore": 2, "scorers": "Weber" },
                 { "home": "SC St. Tönis 1911/20", "away": "Wuppertaler SV", "date": "2026-09-13", "time": "15:30" }
             ],
             6: [
@@ -1025,6 +1059,9 @@
                         if (savedM.awayScore !== undefined && savedM.awayScore !== null) {
                             leagueData.matches[mDay][sIdx].awayScore = savedM.awayScore;
                         }
+                        if (savedM.scorers !== undefined) {
+                            leagueData.matches[mDay][sIdx].scorers = savedM.scorers;
+                        }
                     }
                 });
             }
@@ -1086,12 +1123,18 @@
 
             let deleteBtn = isAdmin ? `<button class="btn-danger" onclick="deleteMatchResult(${idx})" title="Ergebnis löschen">✕</button>` : '';
 
+            // Wenn Scherpenberg beteiligt ist und Torschützen eingetragen sind, diese dezent anzeigen
+            let scorersSub = "";
+            if ((m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") && m.scorers) {
+                scorersSub = `<div style="font-size: 0.7rem; color: var(--svs-bright-blue); margin-top: 2px;">⚽ ${m.scorers}</div>`;
+            }
+
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-size: 0.8rem; color: var(--svs-bright-blue);">${formattedDate}${timeStr}</td>
-                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass, false)}</td>
+                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass, false)}${m.home === "SV Scherpenberg" ? scorersSub : ''}</td>
                 <td style="text-align: center;">${resultDisplay}</td>
-                <td>${getTeamHtml(m.away, false, awayClass, false)}</td>
+                <td>${getTeamHtml(m.away, false, awayClass, false)}${m.away === "SV Scherpenberg" ? scorersSub : ''}</td>
                 <td style="text-align: center;">${deleteBtn}</td>
             `;
             tbody.appendChild(tr);
@@ -1132,7 +1175,7 @@
         `;
     }
 
-    // UNIVERSELLES POPUP FÜR JEDES TEAM
+    // POPUP: ALLE SPIELE FÜR JEDES TEAM
     function openTeamMatchesModal(teamName) {
         document.getElementById('modalTeamTitle').textContent = `📅 ${teamName} — Alle Saisonspiele`;
         let modalBody = document.getElementById('teamMatchesModalBody');
@@ -1196,6 +1239,68 @@
 
     function closeTeamMatchesModal() {
         document.getElementById('teamMatchesModal').style.display = 'none';
+    }
+
+    // POPUP: SV SCHERPENBERG TORSCHÜTZENLISTE
+    function openSvsScorersModal() {
+        let scorerCounts = {};
+
+        // Alle Spiele durchgehen und Torschützen für SV Scherpenberg parsen
+        Object.values(leagueData.matches).forEach(matchList => {
+            if (!Array.isArray(matchList)) return;
+            matchList.forEach(m => {
+                if ((m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") && m.scorers) {
+                    // Beispiel-String: "Müller (2), Schmidt, Weber" oder "Müller (2)" oder "Schmidt"
+                    let parts = m.scorers.split(',');
+                    parts.forEach(p => {
+                        p = p.trim();
+                        if (!p) return;
+                        
+                        let name = p;
+                        let count = 1;
+
+                        // Prüfen ob "(X)" am Ende steht (z.B. Müller (2))
+                        let matchCount = p.match(/^(.+?)\s*\((\d+)\)$/);
+                        if (matchCount) {
+                            name = matchCount[1].trim();
+                            count = parseInt(matchCount[2]);
+                        }
+
+                        if (scorerCounts[name]) {
+                            scorerCounts[name] += count;
+                        } else {
+                            scorerCounts[name] = count;
+                        }
+                    });
+                }
+            });
+        });
+
+        let sortedScorers = Object.entries(scorerCounts).map(([name, goals]) => ({ name, goals }));
+        sortedScorers.sort((a, b) => b.goals - a.goals);
+
+        let tbody = document.getElementById('svsScorersModalBody');
+        tbody.innerHTML = '';
+
+        if (sortedScorers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Noch keine Torschützen eingetragen.</td></tr>`;
+        } else {
+            sortedScorers.forEach((s, idx) => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; font-weight: bold; color: var(--svs-bright-blue);">${idx + 1}.</td>
+                    <td>${s.name}</td>
+                    <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.05rem;">${s.goals}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('svsScorersModal').style.display = 'flex';
+    }
+
+    function closeSvsScorersModal() {
+        document.getElementById('svsScorersModal').style.display = 'none';
     }
 
     function renderTable() {
@@ -1281,6 +1386,18 @@
             let card = document.createElement('div');
             card.className = 'match-input-card';
 
+            let isSvsMatch = (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg");
+            let scorersInputHtml = "";
+
+            if (isSvsMatch) {
+                scorersInputHtml = `
+                    <div class="form-group" style="grid-column: span 4; margin-top: 8px;">
+                        <label>⚽ Torschützen SV Scherpenberg (z.B. Müller (2), Schmidt)</label>
+                        <input type="text" id="sc_${idx}" class="form-control" value="${m.scorers || ''}" placeholder="Torschützen eingeben...">
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
                 <div style="font-size: 0.8rem; color: var(--svs-bright-blue); font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <span>Partie ${idx + 1}</span>
@@ -1303,6 +1420,7 @@
                         <label>Tore Gast</label>
                         <input type="number" id="as_${idx}" class="form-control" value="${m.awayScore !== undefined ? m.awayScore : ''}" min="0">
                     </div>
+                    ${scorersInputHtml}
                 </div>
             `;
             container.appendChild(card);
@@ -1323,10 +1441,19 @@
                 delete existingMatches[idx].homeScore;
                 delete existingMatches[idx].awayScore;
             }
+
+            let scField = document.getElementById(`sc_${idx}`);
+            if (scField) {
+                if (scField.value.trim() !== '') {
+                    existingMatches[idx].scorers = scField.value.trim();
+                } else {
+                    delete existingMatches[idx].scorers;
+                }
+            }
         }
 
         saveAndSync();
-        alert("Ergebnisse erfolgreich gespeichert!");
+        alert("Ergebnisse & Torschützen erfolgreich gespeichert!");
     }
 
     function deleteMatchResult(idx) {
@@ -1334,6 +1461,7 @@
         if (existingMatches && existingMatches[idx]) {
             delete existingMatches[idx].homeScore;
             delete existingMatches[idx].awayScore;
+            delete existingMatches[idx].scorers;
             saveAndSync();
         }
     }
@@ -1344,10 +1472,10 @@
     }
 
     window.onclick = function(e) {
-        let modal = document.getElementById('teamMatchesModal');
-        if (e.target === modal) {
-            closeTeamMatchesModal();
-        }
+        let modal1 = document.getElementById('teamMatchesModal');
+        let modal2 = document.getElementById('svsScorersModal');
+        if (e.target === modal1) closeTeamMatchesModal();
+        if (e.target === modal2) closeSvsScorersModal();
     }
 
     loadFromCloud();
