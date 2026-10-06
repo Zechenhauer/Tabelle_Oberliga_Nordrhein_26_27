@@ -312,10 +312,22 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .visitor-counter-wrapper {
+        .visitor-counter-box {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
             display: flex;
             align-items: center;
+            gap: 6px;
         }
+        .visitor-counter-box span {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
         .admin-toggle-btn {
             background: transparent;
             border: 1px dashed var(--border-color);
@@ -500,12 +512,10 @@
         <button class="btn" onclick="saveAllMatches()">Alle Ergebnisse & Torschützen speichern</button>
     </div>
 
-    <!-- BESUCHER-BADGE & ADMIN SCHALTER UNTEN -->
+    <!-- FOOTER (BESUCHER-ZÄHLER & ADMIN SCHALTER) -->
     <div class="footer-action-row">
-        <div class="visitor-counter-wrapper" title="Dauerhafte App-Aufrufe">
-            <a href="https://github.com/Zechenhauer" target="_blank">
-                <img src="https://api.visitorbadge.io/api/combined?path=https%3A%2F%2Fgithub.com%2FZechenhauer%2Foberliga-scherpenberg&label=Aufrufe&countColor=%2358a6ff&style=flat-square" alt="Besucher-Zähler">
-            </a>
+        <div class="visitor-counter-box" title="Dauerhafte App-Aufrufe">
+            👁️ Aufrufe: <span id="visitorCountDisplay">-</span>
         </div>
         <button class="admin-toggle-btn" onclick="toggleAdminMode()">⚙️ Admin-Zugang</button>
     </div>
@@ -621,6 +631,7 @@
 
     let leagueData = {
         currentMatchday: 1,
+        visitorCount: 0,
         teams: [
             "SV Scherpenberg",
             "Wuppertaler SV",
@@ -1051,9 +1062,15 @@
                     leagueData.currentMatchday = cloudData.currentMatchday || leagueData.currentMatchday;
                     mergeMatches(cloudData);
                 }
-            } else {
-                saveToCloud();
+                if (cloudData && typeof cloudData.visitorCount === 'number') {
+                    leagueData.visitorCount = cloudData.visitorCount;
+                }
             }
+
+            // Aufrufe-Zähler bei jedem Laden hochzählen
+            leagueData.visitorCount = (leagueData.visitorCount || 0) + 1;
+            saveToCloud();
+
         } catch (e) {
             console.log('Fehler beim Laden aus Supabase:', e);
         }
@@ -1089,7 +1106,6 @@
 
             if (error) {
                 console.error('Fehler beim Speichern in Supabase:', error);
-                alert("Fehler beim Speichern in Supabase!");
             }
         } catch (e) {
             console.error('Netzwerkfehler:', e);
@@ -1105,6 +1121,7 @@
         document.getElementById('matchdayDisplay').textContent = `Spieltag ${leagueData.currentMatchday}`;
         document.getElementById('adminMatchdayLabel').textContent = `Spieltag ${leagueData.currentMatchday}`;
         document.getElementById('matchdayTableHeader').textContent = `Spieltag ${leagueData.currentMatchday} — Spiele & Ergebnisse`;
+        document.getElementById('visitorCountDisplay').textContent = leagueData.visitorCount || 1;
         
         renderMatchdayTable();
         renderTable();
