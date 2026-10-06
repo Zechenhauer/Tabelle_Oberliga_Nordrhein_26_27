@@ -273,7 +273,7 @@
             background: rgba(88, 166, 255, 0.12);
         }
 
-        /* Team Logos in Tabellen */
+        /* Klickbare Teams & Logos in Tabellen */
         .team-cell {
             display: flex;
             align-items: center;
@@ -287,6 +287,14 @@
             height: 20px;
             object-fit: contain;
             flex-shrink: 0;
+        }
+        .clickable-team {
+            cursor: pointer;
+            transition: color 0.2s, text-decoration 0.2s;
+        }
+        .clickable-team:hover {
+            color: #ffffff;
+            text-decoration: underline;
         }
 
         /* Admin-Toggle-Button unten */
@@ -397,7 +405,7 @@
     <div class="section-box">
         <div class="section-header">
             <span>SV Scherpenberg — Saison-Auswertung</span>
-            <button class="btn-modal-open" onclick="openSvsMatchesModal()">📅 Alle Spiele Scherpenberg</button>
+            <button class="btn-modal-open" onclick="openTeamMatchesModal('SV Scherpenberg')">📅 Alle Spiele Scherpenberg</button>
         </div>
         <div class="stats-grid" id="svsStatsGrid"></div>
     </div>
@@ -431,6 +439,13 @@
     <!-- GESAMT-TABELLEN-ANSICHT -->
     <div class="section-box">
         <div class="section-header">Oberliga-Tabelle (Gesamt)</div>
+        
+        <!-- HINWEIS-INFO-BOX -->
+        <div style="font-size: 0.8rem; color: var(--text-color); margin-bottom: 12px; background: rgba(88, 166, 255, 0.08); padding: 10px 12px; border-radius: 6px; border-left: 3px solid var(--svs-bright-blue); display: flex; align-items: center; gap: 8px;">
+            <span>💡</span>
+            <span><strong>Tipp:</strong> Klicke in der Tabelle auf einen beliebigen Vereinsnamen, um alle Saisonspiele und die Details des jeweiligen Teams anzuzeigen!</span>
+        </div>
+
         <div class="table-container">
             <table>
                 <thead>
@@ -474,12 +489,12 @@
     </div>
 </div>
 
-<!-- POPUP MODAL: ALLE SPIELE SV SCHERPENBERG -->
-<div class="modal-overlay" id="svsMatchesModal">
+<!-- POPUP MODAL: ALLE SPIELE FÜR JEDES TEAM -->
+<div class="modal-overlay" id="teamMatchesModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">📅 SV Scherpenberg — Alle Saisonspiele</div>
-            <button class="btn-danger" onclick="closeSvsMatchesModal()">✕</button>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;" id="modalTeamTitle">📅 Saisonspiele</div>
+            <button class="btn-danger" onclick="closeTeamMatchesModal()">✕</button>
         </div>
         <div class="modal-body">
             <div class="table-container">
@@ -493,11 +508,11 @@
                             <th>Gast</th>
                         </tr>
                     </thead>
-                    <tbody id="svsMatchesModalBody"></tbody>
+                    <tbody id="teamMatchesModalBody"></tbody>
                 </table>
             </div>
         </div>
-        <button class="btn" style="margin-top: 15px;" onclick="closeSvsMatchesModal()">Schließen</button>
+        <button class="btn" style="margin-top: 15px;" onclick="closeTeamMatchesModal()">Schließen</button>
     </div>
 </div>
 
@@ -534,14 +549,16 @@
         "SSVg Velbert": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/velbert.png"
     };
 
-    function getTeamHtml(teamName, alignRight = false, customClass = "") {
+    function getTeamHtml(teamName, alignRight = false, customClass = "", isClickable = false) {
         const logoUrl = VEREINS_LOGOS[teamName] || "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/scherpenberg.png";
         const alignmentClass = alignRight ? "team-cell right" : "team-cell";
+        const clickAttr = isClickable ? `onclick="openTeamMatchesModal('${teamName}')" title="Alle Spiele von ${teamName} anzeigen"` : '';
+        const nameClass = (isClickable ? "clickable-team " : "") + customClass;
         
         if (alignRight) {
             return `
                 <div class="${alignmentClass}">
-                    <span class="${customClass}">${teamName}</span>
+                    <span class="${nameClass}" ${clickAttr}>${teamName}</span>
                     <img src="${logoUrl}" alt="${teamName}" class="team-logo">
                 </div>
             `;
@@ -549,7 +566,7 @@
             return `
                 <div class="${alignmentClass}">
                     <img src="${logoUrl}" alt="${teamName}" class="team-logo">
-                    <span class="${customClass}">${teamName}</span>
+                    <span class="${nameClass}" ${clickAttr}>${teamName}</span>
                 </div>
             `;
         }
@@ -1072,9 +1089,9 @@
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-size: 0.8rem; color: var(--svs-bright-blue);">${formattedDate}${timeStr}</td>
-                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass)}</td>
+                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass, false)}</td>
                 <td style="text-align: center;">${resultDisplay}</td>
-                <td>${getTeamHtml(m.away, false, awayClass)}</td>
+                <td>${getTeamHtml(m.away, false, awayClass, false)}</td>
                 <td style="text-align: center;">${deleteBtn}</td>
             `;
             tbody.appendChild(tr);
@@ -1115,34 +1132,36 @@
         `;
     }
 
-    function openSvsMatchesModal() {
-        let modalBody = document.getElementById('svsMatchesModalBody');
+    // UNIVERSELLES POPUP FÜR JEDES TEAM
+    function openTeamMatchesModal(teamName) {
+        document.getElementById('modalTeamTitle').textContent = `📅 ${teamName} — Alle Saisonspiele`;
+        let modalBody = document.getElementById('teamMatchesModalBody');
         modalBody.innerHTML = '';
 
-        let svsMatches = [];
+        let teamMatches = [];
         for (let mDay in leagueData.matches) {
             leagueData.matches[mDay].forEach(m => {
-                if (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") {
-                    svsMatches.push({ matchday: parseInt(mDay), ...m });
+                if (m.home === teamName || m.away === teamName) {
+                    teamMatches.push({ matchday: parseInt(mDay), ...m });
                 }
             });
         }
-        svsMatches.sort((a, b) => a.matchday - b.matchday);
+        teamMatches.sort((a, b) => a.matchday - b.matchday);
 
-        if (svsMatches.length === 0) {
+        if (teamMatches.length === 0) {
             modalBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele gefunden.</td></tr>`;
         } else {
-            svsMatches.forEach(m => {
+            teamMatches.forEach(m => {
                 let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
-                let isHome = m.home === "SV Scherpenberg";
+                let isHome = m.home === teamName;
                 
                 let badgeClass = '';
                 if (hasResult) {
-                    let svsGoals = isHome ? m.homeScore : m.awayScore;
+                    let teamGoals = isHome ? m.homeScore : m.awayScore;
                     let oppGoals = isHome ? m.awayScore : m.homeScore;
 
-                    if (svsGoals > oppGoals) badgeClass = 'svs-badge-win';
-                    else if (svsGoals === oppGoals) badgeClass = 'svs-badge-draw';
+                    if (teamGoals > oppGoals) badgeClass = 'svs-badge-win';
+                    else if (teamGoals === oppGoals) badgeClass = 'svs-badge-draw';
                     else badgeClass = 'svs-badge-loss';
                 }
 
@@ -1150,9 +1169,11 @@
                 let awayHtml = getTeamHtml(m.away, false);
 
                 if (isHome && hasResult) {
-                    homeHtml = `<div class="team-cell right"><span class="${badgeClass}">${m.home}</span><img src="${VEREINS_LOGOS[m.home]}" class="team-logo"></div>`;
+                    const logoUrl = VEREINS_LOGOS[m.home] || "";
+                    homeHtml = `<div class="team-cell right"><span class="${badgeClass}">${m.home}</span><img src="${logoUrl}" class="team-logo"></div>`;
                 } else if (!isHome && hasResult) {
-                    awayHtml = `<div class="team-cell"><img src="${VEREINS_LOGOS[m.away]}" class="team-logo"><span class="${badgeClass}">${m.away}</span></div>`;
+                    const logoUrl = VEREINS_LOGOS[m.away] || "";
+                    awayHtml = `<div class="team-cell"><img src="${logoUrl}" class="team-logo"><span class="${badgeClass}">${m.away}</span></div>`;
                 }
 
                 let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color:var(--text-muted);">-:-</span>`;
@@ -1170,11 +1191,11 @@
             });
         }
 
-        document.getElementById('svsMatchesModal').style.display = 'flex';
+        document.getElementById('teamMatchesModal').style.display = 'flex';
     }
 
-    function closeSvsMatchesModal() {
-        document.getElementById('svsMatchesModal').style.display = 'none';
+    function closeTeamMatchesModal() {
+        document.getElementById('teamMatchesModal').style.display = 'none';
     }
 
     function renderTable() {
@@ -1233,7 +1254,7 @@
 
             tr.innerHTML = `
                 <td><strong>${idx + 1}.</strong></td>
-                <td>${getTeamHtml(s.name, false)}</td>
+                <td>${getTeamHtml(s.name, false, "", true)}</td>
                 <td style="text-align: center;">${s.played}</td>
                 <td style="text-align: center;">${s.won}</td>
                 <td style="text-align: center;">${s.draw}</td>
@@ -1323,9 +1344,9 @@
     }
 
     window.onclick = function(e) {
-        let modal = document.getElementById('svsMatchesModal');
+        let modal = document.getElementById('teamMatchesModal');
         if (e.target === modal) {
-            closeSvsMatchesModal();
+            closeTeamMatchesModal();
         }
     }
 
