@@ -303,10 +303,18 @@
             text-decoration: underline;
         }
 
-        /* Admin-Toggle-Button unten */
-        .admin-toggle-wrapper {
-            text-align: right;
+        /* Footer-Bereich unten (Statistik & Admin) */
+        .footer-action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .visitor-counter-wrapper {
+            display: flex;
+            align-items: center;
         }
         .admin-toggle-btn {
             background: transparent;
@@ -492,8 +500,13 @@
         <button class="btn" onclick="saveAllMatches()">Alle Ergebnisse & Torschützen speichern</button>
     </div>
 
-    <!-- ADMIN SCHALTER UNTEN -->
-    <div class="admin-toggle-wrapper">
+    <!-- BESUCHER-BADGE & ADMIN SCHALTER UNTEN -->
+    <div class="footer-action-row">
+        <div class="visitor-counter-wrapper" title="Dauerhafte App-Aufrufe">
+            <a href="https://github.com/Zechenhauer" target="_blank">
+                <img src="https://api.visitorbadge.io/api/combined?path=https%3A%2F%2Fgithub.com%2FZechenhauer%2Foberliga-scherpenberg&label=Aufrufe&countColor=%2358a6ff&style=flat-square" alt="Besucher-Zähler">
+            </a>
+        </div>
         <button class="admin-toggle-btn" onclick="toggleAdminMode()">⚙️ Admin-Zugang</button>
     </div>
 </div>
@@ -1123,7 +1136,6 @@
 
             let deleteBtn = isAdmin ? `<button class="btn-danger" onclick="deleteMatchResult(${idx})" title="Ergebnis löschen">✕</button>` : '';
 
-            // Wenn Scherpenberg beteiligt ist und Torschützen eingetragen sind, diese dezent anzeigen
             let scorersSub = "";
             if ((m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") && m.scorers) {
                 scorersSub = `<div style="font-size: 0.7rem; color: var(--svs-bright-blue); margin-top: 2px;">⚽ ${m.scorers}</div>`;
@@ -1175,7 +1187,6 @@
         `;
     }
 
-    // POPUP: ALLE SPIELE FÜR JEDES TEAM
     function openTeamMatchesModal(teamName) {
         document.getElementById('modalTeamTitle').textContent = `📅 ${teamName} — Alle Saisonspiele`;
         let modalBody = document.getElementById('teamMatchesModalBody');
@@ -1241,16 +1252,13 @@
         document.getElementById('teamMatchesModal').style.display = 'none';
     }
 
-    // POPUP: SV SCHERPENBERG TORSCHÜTZENLISTE
     function openSvsScorersModal() {
         let scorerCounts = {};
 
-        // Alle Spiele durchgehen und Torschützen für SV Scherpenberg parsen
         Object.values(leagueData.matches).forEach(matchList => {
             if (!Array.isArray(matchList)) return;
             matchList.forEach(m => {
                 if ((m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") && m.scorers) {
-                    // Beispiel-String: "Müller (2), Schmidt, Weber" oder "Müller (2)" oder "Schmidt"
                     let parts = m.scorers.split(',');
                     parts.forEach(p => {
                         p = p.trim();
@@ -1259,7 +1267,6 @@
                         let name = p;
                         let count = 1;
 
-                        // Prüfen ob "(X)" am Ende steht (z.B. Müller (2))
                         let matchCount = p.match(/^(.+?)\s*\((\d+)\)$/);
                         if (matchCount) {
                             name = matchCount[1].trim();
