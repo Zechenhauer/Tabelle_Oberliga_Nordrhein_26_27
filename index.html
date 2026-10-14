@@ -7,6 +7,8 @@
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%23004d9d%22/><text x=%2250%22 y=%2270%22 font-size=%2260%22 text-anchor=%22middle%22>⚽</text></svg>">
     
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -137,6 +139,20 @@
         }
         .btn-modal-open:hover { background: #79c0ff; }
 
+        .btn-admin-toggle {
+            background: #21262d;
+            color: var(--svs-bright-blue);
+            border: 1px solid var(--svs-bright-blue);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .btn-admin-toggle:hover { background: var(--svs-bright-blue); color: #000; }
+
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -257,37 +273,25 @@
             border-bottom: 2px solid var(--border-color);
         }
         td {
-            padding: 12px 8px;
+            padding: 10px 8px;
             border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
+            vertical-align: middle;
         }
         tr:hover { background-color: rgba(255,255,255,0.02); }
 
-        tr.rank-first td {
-            background: rgba(46, 160, 67, 0.12);
-            color: #3fb950;
-        }
-        tr.rank-last td {
-            background: rgba(248, 81, 73, 0.12);
-            color: #f85149;
-        }
-        tr.svs-team-row td {
-            font-weight: bold;
-            color: var(--svs-bright-blue);
-            background: rgba(88, 166, 255, 0.12);
-        }
+        tr.rank-first td { background: rgba(46, 160, 67, 0.12); }
+        tr.rank-last td { background: rgba(248, 81, 73, 0.12); }
+        tr.svs-team-row td { font-weight: bold; background: rgba(88, 166, 255, 0.12); }
 
         .team-cell {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .team-cell.right {
-            justify-content: flex-end;
-        }
+        .team-cell.right { justify-content: flex-end; }
         .team-logo {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -295,10 +299,7 @@
             cursor: pointer;
             transition: color 0.2s, text-decoration 0.2s;
         }
-        .clickable-team:hover {
-            color: #ffffff;
-            text-decoration: underline;
-        }
+        .clickable-team:hover { color: #ffffff; text-decoration: underline; }
 
         .footer-action-row {
             display: flex;
@@ -325,10 +326,7 @@
             align-items: center;
             gap: 6px;
         }
-        .visitor-counter-box span {
-            color: #ffffff;
-            font-weight: bold;
-        }
+        .visitor-counter-box span { color: #ffffff; font-weight: bold; }
 
         .chart-trigger-btn {
             background: #21262d;
@@ -372,6 +370,25 @@
             font-weight: bold;
             font-size: 1rem;
         }
+
+        .admin-box {
+            display: none;
+            background: #0d1117;
+            border: 1px dashed var(--svs-bright-blue);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .admin-box input, .admin-box select {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
     </style>
 </head>
 <body>
@@ -393,7 +410,8 @@
             <span>SV Scherpenberg — Saison-Auswertung</span>
             <div class="header-btn-group">
                 <button class="btn-modal-open" onclick="openTeamMatchesModal('SV Scherpenberg')">📅 Alle Spiele</button>
-                <button class="btn-modal-open" onclick="openSvsScorersModal()">⚽ Torschützen</button>
+                <button class="btn-modal-open" onclick="openLeagueScorersModal()">⚽ Torjägerliste</button>
+                <button class="btn-modal-open" style="background: #2ea043; color: #fff;" onclick="openSvsScorersModal()">⚽ SVS-Torschützen</button>
             </div>
         </div>
         <div class="stats-grid" id="svsStatsGrid"></div>
@@ -499,24 +517,84 @@
     </div>
 </div>
 
-<!-- POPUP MODAL: SV SCHERPENBERG TORSCHÜTZEN -->
-<div class="modal-overlay" id="svsScorersModal">
+<!-- POPUP MODAL: TORJÄGERLISTE (GESAMT) + ADMIN -->
+<div class="modal-overlay" id="leagueScorersModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">⚽ SV Scherpenberg — Torschützenliste</div>
-            <button class="btn-danger" onclick="closeSvsScorersModal()">✕</button>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
+                <span>⚽ Torjäger — Oberliga Niederrhein</span>
+                <button class="btn-admin-toggle" onclick="toggleAdminMode()" title="Admin-Modus aktivieren">🔒 Admin</button>
+            </div>
+            <button class="btn-danger" onclick="closeLeagueScorersModal()">✕</button>
         </div>
         <div class="modal-body">
+            <div class="admin-box" id="adminBoxLeague">
+                <div style="font-size: 0.8rem; font-weight: bold; color: var(--svs-bright-blue); margin-bottom: 8px;">➕ Torschütze hinzufügen / bearbeiten (Admin):</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <input type="text" id="manualPlayerNameLeague" placeholder="Spielername" style="flex: 2; min-width: 130px;">
+                    <select id="manualTeamSelectLeague" style="flex: 2; min-width: 130px;"></select>
+                    <input type="number" id="manualSpieleLeague" value="9" min="0" max="34" style="width: 55px; text-align: center;" title="Spiele (Sp)">
+                    <input type="number" id="manualToreLeague" value="1" min="1" max="50" style="width: 55px; text-align: center;" title="Tore">
+                    <button class="btn-modal-open" onclick="saveScorerToSupabase('league')">Speichern</button>
+                </div>
+            </div>
+
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 40px; text-align: center;">Pl.</th>
-                            <th>Spieler / Torschütze</th>
-                            <th style="text-align: center; width: 80px;">Tore</th>
+                            <th style="width: 35px; text-align: center;">#</th>
+                            <th>Spieler</th>
+                            <th style="text-align: center; width: 50px;">Sp</th>
+                            <th style="text-align: center; width: 60px;">Tore</th>
+                            <th style="width: 40px; text-align: center;" id="actionHeaderCol" style="display: none;">Aktion</th>
                         </tr>
                     </thead>
-                    <tbody id="svsScorersModalBody"></tbody>
+                    <tbody id="leagueScorersModalBody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Torjäger aus Supabase Cloud...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn-modal-open" style="margin-top: 15px; width: 100%; padding: 10px;" onclick="closeLeagueScorersModal()">Schließen</button>
+    </div>
+</div>
+
+<!-- POPUP MODAL: SVS TORSCHÜTZEN + ADMIN -->
+<div class="modal-overlay" id="svsScorersModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
+                <span>⚽ SVS Torjäger — SV Scherpenberg</span>
+                <button class="btn-admin-toggle" onclick="toggleAdminMode()" title="Admin-Modus aktivieren">🔒 Admin</button>
+            </div>
+            <button class="btn-danger" onclick="closeSvsScorersModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="admin-box" id="adminBoxSvs">
+                <div style="font-size: 0.8rem; font-weight: bold; color: var(--svs-bright-blue); margin-bottom: 8px;">➕ SVS Torschütze hinzufügen (Admin):</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <input type="text" id="manualPlayerNameSvs" placeholder="Spielername" style="flex: 2; min-width: 140px;">
+                    <input type="number" id="manualSpieleSvs" value="9" min="0" max="34" style="width: 55px; text-align: center;" title="Spiele (Sp)">
+                    <input type="number" id="manualToreSvs" value="1" min="1" max="50" style="width: 55px; text-align: center;" title="Tore">
+                    <button class="btn-modal-open" onclick="saveScorerToSupabase('svs')">Speichern</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 35px; text-align: center;">#</th>
+                            <th>Spieler</th>
+                            <th style="text-align: center; width: 50px;">Sp</th>
+                            <th style="text-align: center; width: 60px;">Tore</th>
+                            <th style="width: 40px; text-align: center;" id="actionHeaderColSvs" style="display: none;">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="svsScorersModalBody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade SVS Torjäger...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -529,6 +607,13 @@
     const OPENDB_SEASON = "2026";
     let visitorChartInstance = null;
     let isChartOpen = false;
+    let isAdminUnlocked = false;
+
+    // Supabase Client
+    const SUPABASE_URL = "https://lhusylpjnujlqomougmg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxodXN5bHBqbnVqbHFvbW91Z21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMzA0ODIsImV4cCI6MjEwNDYwNjQ4Mn0.9ugazAA5pEdy9uSaJQWa5BMb7EwSH9d-h5K8ln_PF5A";
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const VEREINS_LOGOS = {
         "SV Scherpenberg": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/scherpenberg.png",
@@ -538,6 +623,7 @@
         "KFC Uerdingen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/uerdingen.png",
         "1. Spvg. Solingen Wald 03": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/solingen.png",
         "VfL Jüchen-Garzweiler": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/juechen.png",
+        "Jüchen-Garzweiler": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/juechen.png",
         "1. FC Monheim": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/monheim.png",
         "Ratingen 04/19": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/ratingen.png",
         "Wuppertaler SV": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/wuppertal.png",
@@ -559,7 +645,12 @@
     };
 
     function getTeamHtml(teamName, alignRight = false, customClass = "", isClickable = false) {
-        const logoUrl = VEREINS_LOGOS[teamName] || "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/scherpenberg.png";
+        let logoUrl = VEREINS_LOGOS[teamName];
+        if (!logoUrl) {
+            let foundKey = Object.keys(VEREINS_LOGOS).find(k => k.toLowerCase().includes(teamName.toLowerCase()) || teamName.toLowerCase().includes(k.toLowerCase()));
+            logoUrl = foundKey ? VEREINS_LOGOS[foundKey] : "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/scherpenberg.png";
+        }
+
         const alignmentClass = alignRight ? "team-cell right" : "team-cell";
         const clickAttr = isClickable ? `onclick="openTeamMatchesModal('${teamName}')" title="Alle Spiele von ${teamName} anzeigen"` : '';
         const nameClass = (isClickable ? "clickable-team " : "") + customClass;
@@ -610,63 +701,6 @@
                         }
                     }
 
-                    let homeScorers = [];
-                    let awayScorers = [];
-
-                    if (m.goals && m.goals.length > 0) {
-                        let sortedGoals = [...m.goals].sort((a, b) => (a.matchMinute || 0) - (b.matchMinute || 0));
-
-                        let lastS1 = 0;
-                        let lastS2 = 0;
-
-                        sortedGoals.forEach(g => {
-                            let playerName = g.goalGetterName ? g.goalGetterName.trim() : "";
-                            let minute = g.matchMinute !== undefined && g.matchMinute !== null && g.matchMinute !== "" ? g.matchMinute : "";
-                            
-                            if (!playerName && g.comment) {
-                                playerName = g.comment.trim();
-                            }
-                            if (!playerName && minute !== "") {
-                                playerName = "Tor";
-                            }
-
-                            let currentS1 = g.scoreTeam1 !== undefined && g.scoreTeam1 !== null ? g.scoreTeam1 : lastS1;
-                            let currentS2 = g.scoreTeam2 !== undefined && g.scoreTeam2 !== null ? g.scoreTeam2 : lastS2;
-
-                            let isHomeGoal = false;
-                            if (currentS1 > lastS1) {
-                                isHomeGoal = true;
-                            } else if (currentS2 === lastS2 && currentS1 === lastS1) {
-                                if (g.teamId && m.team1 && g.teamId === m.team1.teamId) isHomeGoal = true;
-                            }
-
-                            lastS1 = currentS1;
-                            lastS2 = currentS2;
-
-                            let goalData = {
-                                name: playerName || "Tor",
-                                minute: minute,
-                                score1: currentS1,
-                                score2: currentS2,
-                                isSvs: (isHomeGoal && homeTeam === "SV Scherpenberg") || (!isHomeGoal && awayTeam === "SV Scherpenberg")
-                            };
-
-                            if (isHomeGoal) {
-                                homeScorers.push(goalData);
-                            } else {
-                                awayScorers.push(goalData);
-                            }
-                        });
-
-                        if ((homeScore === null || awayScore === null) && sortedGoals.length > 0) {
-                            let lastG = sortedGoals[sortedGoals.length - 1];
-                            if (lastG.scoreTeam1 !== undefined && lastG.scoreTeam2 !== undefined) {
-                                homeScore = lastG.scoreTeam1;
-                                awayScore = lastG.scoreTeam2;
-                            }
-                        }
-                    }
-
                     matchesMap[mDay].push({
                         home: homeTeam,
                         away: awayTeam,
@@ -674,8 +708,6 @@
                         time: m.matchDateTime ? m.matchDateTime.split('T')[1].substring(0, 5) : '',
                         homeScore: homeScore,
                         awayScore: awayScore,
-                        homeScorers: homeScorers,
-                        awayScorers: awayScorers,
                         matchIsFinished: m.matchIsFinished || (homeScore !== null && awayScore !== null)
                     });
                 });
@@ -762,11 +794,9 @@
         trackVisitor();
         await fetchOpenLigaDbData();
 
-        // Automatischen aktuellen Spieltag ermitteln
         let determinedMatchday = 1;
         const todayStr = new Date().toISOString().split('T')[0];
 
-        // 1. Versuchen, den Spieltag anhand des heutigen Datums zu finden
         let foundToday = false;
         for (let mDay in leagueData.matches) {
             let matches = leagueData.matches[mDay];
@@ -782,7 +812,6 @@
             if (foundToday) break;
         }
 
-        // 2. Falls kein Spiel exakt heute stattfindet, das nächste offene/kommende Spiel suchen
         if (!foundToday) {
             for (let mDay = 1; mDay <= 34; mDay++) {
                 let matches = leagueData.matches[mDay];
@@ -798,6 +827,20 @@
 
         leagueData.currentMatchday = determinedMatchday;
         renderAll();
+        populateTeamSelect();
+    }
+
+    function populateTeamSelect() {
+        let select = document.getElementById('manualTeamSelectLeague');
+        select.innerHTML = '';
+        let teamsList = leagueData.teams.length > 0 ? leagueData.teams : Object.keys(VEREINS_LOGOS);
+        teamsList.sort().forEach(t => {
+            let opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            if (t === "SV Scherpenberg") opt.selected = true;
+            select.appendChild(opt);
+        });
     }
 
     function renderAll() {
@@ -832,38 +875,12 @@
                 ? `<strong>${m.homeScore}:${m.awayScore}</strong><div style="font-size: 0.7rem; color: #3fb950; font-weight: normal; margin-top: 2px;">(Endstand)</div>` 
                 : `<span style="color: var(--text-muted); font-style: italic;">vs</span>`;
 
-            let homeScorersHtml = "";
-            if (m.homeScorers && m.homeScorers.length > 0) {
-                homeScorersHtml = m.homeScorers.map(s => {
-                    let minStr = s.minute !== '' ? ` (${s.minute}')` : '';
-                    let scoreStr = ` (${s.score1}:${s.score2})`;
-                    return `<div style="font-size: 0.72rem; color: var(--svs-bright-blue); line-height: 1.4; white-space: nowrap;">⚽ ${s.name}${minStr}${scoreStr}</div>`;
-                }).join('');
-            }
-
-            let awayScorersHtml = "";
-            if (m.awayScorers && m.awayScorers.length > 0) {
-                awayScorersHtml = m.awayScorers.map(s => {
-                    let minStr = s.minute !== '' ? ` (${s.minute}')` : '';
-                    let scoreStr = ` (${s.score1}:${s.score2})`;
-                    return `<div style="font-size: 0.72rem; color: var(--svs-bright-blue); line-height: 1.4; white-space: nowrap;">⚽ ${s.name}${minStr}${scoreStr}</div>`;
-                }).join('');
-            }
-
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-size: 0.8rem; color: var(--svs-bright-blue);">${formattedDate}${timeStr}</td>
-                <td style="text-align: right;">
-                    ${getTeamHtml(m.home, true, homeClass, false)}
-                    <div style="margin-top: 4px; display: flex; flex-direction: column; align-items: flex-end;">${homeScorersHtml}</div>
-                </td>
-                <td style="text-align: center; vertical-align: middle;">
-                    ${resultDisplay}
-                </td>
-                <td style="text-align: left;">
-                    ${getTeamHtml(m.away, false, awayClass, false)}
-                    <div style="margin-top: 4px; display: flex; flex-direction: column; align-items: flex-start;">${awayScorersHtml}</div>
-                </td>
+                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass, false)}</td>
+                <td style="text-align: center; vertical-align: middle;">${resultDisplay}</td>
+                <td style="text-align: left;">${getTeamHtml(m.away, false, awayClass, false)}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -968,56 +985,140 @@
         document.getElementById('teamMatchesModal').style.display = 'none';
     }
 
-    function openSvsScorersModal() {
-        let scorerCounts = {};
+    async function openLeagueScorersModal() {
+        document.getElementById('leagueScorersModal').style.display = 'flex';
+        await loadScorersFromSupabase(false);
+    }
 
-        Object.values(leagueData.matches).forEach(matchList => {
-            if (!Array.isArray(matchList)) return;
-            matchList.forEach(m => {
-                let relevantScorers = [];
-                if (m.home === "SV Scherpenberg") relevantScorers = m.homeScorers;
-                if (m.away === "SV Scherpenberg") relevantScorers = m.awayScorers;
+    function closeLeagueScorersModal() {
+        document.getElementById('leagueScorersModal').style.display = 'none';
+    }
 
-                if (relevantScorers && relevantScorers.length > 0) {
-                    relevantScorers.forEach(s => {
-                        let name = s.name.trim();
-                        let upperName = name.toUpperCase();
-
-                        let isOwnGoal = upperName.includes("(ET)") || upperName.includes("[ET]") || upperName.includes("EIGENTOR");
-
-                        if (name && name !== "Tor" && !isOwnGoal) {
-                            scorerCounts[name] = (scorerCounts[name] || 0) + 1;
-                        }
-                    });
-                }
-            });
-        });
-
-        let sortedScorers = Object.entries(scorerCounts).map(([name, goals]) => ({ name, goals }));
-        sortedScorers.sort((a, b) => b.goals - a.goals);
-
-        let tbody = document.getElementById('svsScorersModalBody');
-        tbody.innerHTML = '';
-
-        if (sortedScorers.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Torschützen für den SV Scherpenberg gefunden.</td></tr>`;
-        } else {
-            sortedScorers.forEach((s, idx) => {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="text-align: center; font-weight: bold; color: var(--svs-bright-blue);">${idx + 1}.</td>
-                    <td>${s.name}</td>
-                    <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.05rem;">${s.goals}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
+    async function openSvsScorersModal() {
         document.getElementById('svsScorersModal').style.display = 'flex';
+        await loadScorersFromSupabase(true);
     }
 
     function closeSvsScorersModal() {
         document.getElementById('svsScorersModal').style.display = 'none';
+    }
+
+    function toggleAdminMode() {
+        let pwd = prompt("Bitte Admin-Passwort eingeben:");
+        if (pwd === "SVS2026") {
+            isAdminUnlocked = !isAdminUnlocked;
+            document.getElementById('adminBoxLeague').style.display = isAdminUnlocked ? 'block' : 'none';
+            document.getElementById('adminBoxSvs').style.display = isAdminUnlocked ? 'block' : 'none';
+            alert(isAdminUnlocked ? "Admin-Modus aktiviert!" : "Admin-Modus gesperrt.");
+            loadScorersFromSupabase(false);
+            loadScorersFromSupabase(true);
+        } else if (pwd !== null) {
+            alert("Falsches Passwort!");
+        }
+    }
+
+    async function loadScorersFromSupabase(onlySvs = false) {
+        let tbodyId = onlySvs ? 'svsScorersModalBody' : 'leagueScorersModalBody';
+        let tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Torjägerliste...</td></tr>`;
+
+        let query = supabaseClient.from('oberliga_torschuetzen').select('*').order('tore', { ascending: false });
+        if (onlySvs) {
+            query = query.eq('team', 'SV Scherpenberg');
+        }
+
+        let { data, error } = await query;
+
+        if (error) {
+            console.error("Fehler beim Laden:", error);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-red); padding: 20px;">Fehler beim Laden.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = '';
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Noch keine Torjäger eingetragen.</td></tr>`;
+            return;
+        }
+
+        data.forEach((s, idx) => {
+            let tr = document.createElement('tr');
+            let teamDisplayHtml = getTeamHtml(s.team, false, "", false);
+            let deleteBtnHtml = isAdminUnlocked ? `<button class="btn-danger" style="font-size: 0.9rem;" onclick="deleteScorerFromSupabase(${s.id}, ${onlySvs})" title="Löschen">🗑️</button>` : '';
+
+            let rawRank = idx + 1;
+            // In der Gesamtliste werden Nummern oberhalb von 10 (wie 11, 12, 30 usw.) leer gelassen.
+            // In der reinen SVS-Liste (onlySvs) zählt es ganz normal von 1 aufwärts.
+            let rankDisplay = onlySvs ? rawRank : (rawRank <= 10 ? rawRank : '');
+
+            tr.innerHTML = `
+                <td style="text-align: center; font-weight: bold; color: var(--svs-bright-blue);">${rankDisplay}</td>
+                <td>
+                    <div style="font-weight: bold; color: #ffffff;">${s.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${teamDisplayHtml}</div>
+                </td>
+                <td style="text-align: center; color: var(--text-color);">${s.spiele}</td>
+                <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.1rem;">${s.tore}</td>
+                <td style="text-align: center;">${isAdminUnlocked ? deleteBtnHtml : ''}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function saveScorerToSupabase(mode) {
+        let name, team, spiele, tore;
+
+        if (mode === 'league') {
+            name = document.getElementById('manualPlayerNameLeague').value.trim();
+            team = document.getElementById('manualTeamSelectLeague').value;
+            spiele = parseInt(document.getElementById('manualSpieleLeague').value) || 0;
+            tore = parseInt(document.getElementById('manualToreLeague').value) || 1;
+        } else {
+            name = document.getElementById('manualPlayerNameSvs').value.trim();
+            team = "SV Scherpenberg";
+            spiele = parseInt(document.getElementById('manualSpieleSvs').value) || 0;
+            tore = parseInt(document.getElementById('manualToreSvs').value) || 1;
+        }
+
+        if (!name) {
+            alert("Bitte gib einen Spielernamen ein!");
+            return;
+        }
+
+        let { error } = await supabaseClient
+            .from('oberliga_torschuetzen')
+            .insert([{ name: name, team: team, spiele: spiele, tore: tore }]);
+
+        if (error) {
+            console.error("Fehler beim Speichern:", error);
+            alert("Fehler beim Speichern in Supabase.");
+            return;
+        }
+
+        if (mode === 'league') {
+            document.getElementById('manualPlayerNameLeague').value = '';
+            await loadScorersFromSupabase(false);
+        } else {
+            document.getElementById('manualPlayerNameSvs').value = '';
+            await loadScorersFromSupabase(true);
+        }
+    }
+
+    async function deleteScorerFromSupabase(id, onlySvs) {
+        if (!confirm("Möchtest du diesen Torschützen wirklich löschen?")) return;
+
+        let { error } = await supabaseClient
+            .from('oberliga_torschuetzen')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error("Fehler beim Löschen:", error);
+            alert("Fehler beim Löschen.");
+            return;
+        }
+
+        await loadScorersFromSupabase(onlySvs);
     }
 
     function renderTable() {
@@ -1094,9 +1195,11 @@
 
     window.onclick = function(e) {
         let modal1 = document.getElementById('teamMatchesModal');
-        let modal2 = document.getElementById('svsScorersModal');
+        let modal2 = document.getElementById('leagueScorersModal');
+        let modal3 = document.getElementById('svsScorersModal');
         if (e.target === modal1) closeTeamMatchesModal();
-        if (e.target === modal2) closeSvsScorersModal();
+        if (e.target === modal2) closeLeagueScorersModal();
+        if (e.target === modal3) closeSvsScorersModal();
     }
 
     initApp();
