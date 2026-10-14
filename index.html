@@ -602,7 +602,6 @@
                     let homeScore = null;
                     let awayScore = null;
 
-                    // Primär das offizielle Ergebnis der API nutzen
                     if (m.matchResults && m.matchResults.length > 0) {
                         let finalRes = m.matchResults.find(r => r.resultTypeID === 2) || m.matchResults[m.matchResults.length - 1];
                         if (finalRes && finalRes.pointsTeam1 !== null && finalRes.pointsTeam2 !== null) {
@@ -659,7 +658,6 @@
                             }
                         });
 
-                        // Fallback: Wenn das offizielle API-Ergebnis fehlt, den Endstand aus dem letzten Tor übernehmen
                         if ((homeScore === null || awayScore === null) && sortedGoals.length > 0) {
                             let lastG = sortedGoals[sortedGoals.length - 1];
                             if (lastG.scoreTeam1 !== undefined && lastG.scoreTeam2 !== undefined) {
@@ -763,6 +761,42 @@
     async function initApp() {
         trackVisitor();
         await fetchOpenLigaDbData();
+
+        // Automatischen aktuellen Spieltag ermitteln
+        let determinedMatchday = 1;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // 1. Versuchen, den Spieltag anhand des heutigen Datums zu finden
+        let foundToday = false;
+        for (let mDay in leagueData.matches) {
+            let matches = leagueData.matches[mDay];
+            if (Array.isArray(matches)) {
+                for (let m of matches) {
+                    if (m.date === todayStr) {
+                        determinedMatchday = parseInt(mDay);
+                        foundToday = true;
+                        break;
+                    }
+                }
+            }
+            if (foundToday) break;
+        }
+
+        // 2. Falls kein Spiel exakt heute stattfindet, das nächste offene/kommende Spiel suchen
+        if (!foundToday) {
+            for (let mDay = 1; mDay <= 34; mDay++) {
+                let matches = leagueData.matches[mDay];
+                if (Array.isArray(matches) && matches.length > 0) {
+                    let hasUnfinished = matches.some(m => !m.matchIsFinished);
+                    if (hasUnfinished) {
+                        determinedMatchday = mDay;
+                        break;
+                    }
+                }
+            }
+        }
+
+        leagueData.currentMatchday = determinedMatchday;
         renderAll();
     }
 
