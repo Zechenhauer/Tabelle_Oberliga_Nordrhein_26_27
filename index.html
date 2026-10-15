@@ -232,10 +232,28 @@
             text-transform: uppercase;
         }
 
-        /* 4ER GRID KACHELN STILE */
+        /* FORMVERLAUF KACHEL */
+        .form-card {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .form-card-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--svs-bright-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        /* 3ER GRID KACHELN */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -494,7 +512,13 @@
         <div class="stats-grid" id="svsStatsGrid"></div>
     </div>
 
-    <!-- 4ER GRID KACHELN -->
+    <!-- SEPARATE KACHEL: FORMVERLAUF (LETZTE 12 SPIELE) -->
+    <div class="form-card">
+        <div class="form-card-title">📈 Formverlauf (letzte 12 Spiele):</div>
+        <div class="dash-card-content" id="formCurveWidget" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">Noch keine beendeten Spiele</div>
+    </div>
+
+    <!-- 3ER GRID KACHELN -->
     <div class="dashboard-grid">
         <!-- 1. Nächstes Spiel mit Countdown -->
         <div class="dash-card">
@@ -506,12 +530,7 @@
             <div class="dash-card-title">🏁 Letztes Pflichtspiel</div>
             <div class="dash-card-content" id="lastMatchWidget">Wird geladen...</div>
         </div>
-        <!-- 3. Formkurve -->
-        <div class="dash-card">
-            <div class="dash-card-title">📈 Formkurve (Letzte Spiele)</div>
-            <div class="dash-card-content" id="formCurveWidget">Noch keine beendeten Spiele<br><span style="font-size:0.75rem; color:var(--text-muted)">S = Sieg | U = Unentschieden | N = Niederlage</span></div>
-        </div>
-        <!-- 4. Heim vs. Auswärts -->
+        <!-- 3. Heim vs. Auswärts -->
         <div class="dash-card">
             <div class="dash-card-title">🏟️ Heim vs. Auswärts</div>
             <div class="dash-card-content" id="homeAwayWidget">Heim: 0S - 0U - 0N (0 Pkt)<br>Auswärts: 0S - 0U - 0N (0 Pkt)</div>
@@ -1079,19 +1098,21 @@
             lastWidget.innerHTML = "Noch kein beendetes Spiel.";
         }
 
-        // 3. Formkurve Widget
+        // 3. Formkurve Widget (Letzte 12 Spiele)
         let formWidget = document.getElementById('formCurveWidget');
         if (pastMatches.length > 0) {
-            let last5 = pastMatches.slice(-5);
-            let badges = last5.map(m => {
+            let last12 = pastMatches.slice(-12);
+            let badges = last12.map(m => {
                 let isHome = m.home === "SV Scherpenberg";
                 let myG = isHome ? m.homeScore : m.awayScore;
                 let oppG = isHome ? m.awayScore : m.homeScore;
-                if (myG > oppG) return '<span style="background:#2ea043; color:#fff; padding:2px 6px; border-radius:3px; font-weight:bold;">S</span>';
-                else if (myG === oppG) return '<span style="background:#e3b341; color:#000; padding:2px 6px; border-radius:3px; font-weight:bold;">U</span>';
-                else return '<span style="background:#f85149; color:#fff; padding:2px 6px; border-radius:3px; font-weight:bold;">N</span>';
+                if (myG > oppG) return '<span style="background:#2ea043; color:#fff; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; font-size:0.8rem;">S</span>';
+                else if (myG === oppG) return '<span style="background:#e3b341; color:#000; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; font-size:0.8rem;">U</span>';
+                else return '<span style="background:#f85149; color:#fff; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; font-size:0.8rem;">N</span>';
             }).join(' ');
-            formWidget.innerHTML = `<div style="display:flex; gap:6px; align-items:center; margin-bottom:4px;">${badges}</div><span style="font-size:0.75rem; color:var(--text-muted)">Letzte ${last5.length} Pflichtspiele</span>`;
+            formWidget.innerHTML = badges;
+        } else {
+            formWidget.innerHTML = '<span style="font-size:0.85rem; color:var(--text-muted);">Noch keine beendeten Spiele</span>';
         }
 
         // 4. Heim vs. Auswärts Widget
