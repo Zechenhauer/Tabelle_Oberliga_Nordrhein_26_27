@@ -22,6 +22,7 @@
             --accent-green: #2ea043;
             --accent-red: #f85149;
             --svs-bright-blue: #58a6ff;
+            --s04-gold: #ffcc00;
         }
 
         * { box-sizing: border-box; }
@@ -229,6 +230,36 @@
             font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
+        }
+
+        /* 4ER GRID KACHELN STILE */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .dash-card {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .dash-card-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--svs-bright-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dash-card-content {
+            font-size: 0.9rem;
+            color: var(--text-color);
         }
 
         .matchday-controls {
@@ -463,6 +494,30 @@
         <div class="stats-grid" id="svsStatsGrid"></div>
     </div>
 
+    <!-- 4ER GRID KACHELN -->
+    <div class="dashboard-grid">
+        <!-- 1. Nächstes Spiel mit Countdown -->
+        <div class="dash-card">
+            <div class="dash-card-title">⚽ Nächstes Spiel</div>
+            <div class="dash-card-content" id="nextMatchWidget">Lade nächstes Spiel...</div>
+        </div>
+        <!-- 2. Letztes Pflichtspiel -->
+        <div class="dash-card">
+            <div class="dash-card-title">🏁 Letztes Pflichtspiel</div>
+            <div class="dash-card-content" id="lastMatchWidget">Wird geladen...</div>
+        </div>
+        <!-- 3. Formkurve -->
+        <div class="dash-card">
+            <div class="dash-card-title">📈 Formkurve (Letzte Spiele)</div>
+            <div class="dash-card-content" id="formCurveWidget">Noch keine beendeten Spiele<br><span style="font-size:0.75rem; color:var(--text-muted)">S = Sieg | U = Unentschieden | N = Niederlage</span></div>
+        </div>
+        <!-- 4. Heim vs. Auswärts -->
+        <div class="dash-card">
+            <div class="dash-card-title">🏟️ Heim vs. Auswärts</div>
+            <div class="dash-card-content" id="homeAwayWidget">Heim: 0S - 0U - 0N (0 Pkt)<br>Auswärts: 0S - 0U - 0N (0 Pkt)</div>
+        </div>
+    </div>
+
     <!-- SPIELTAGS-TABELLE -->
     <div class="section-box">
         <div class="section-header" id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</div>
@@ -664,7 +719,6 @@
     let isAdminUnlocked = false;
     const ADMIN_PASSWORD = "SVS2026";
 
-    // Supabase Client
     const SUPABASE_URL = "https://lhusylpjnujlqomougmg.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxodXN5bHBqbnVqbHFvbW91Z21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMzA0ODIsImV4cCI6MjEwNDYwNjQ4Mn0.9ugazAA5pEdy9uSaJQWa5BMb7EwSH9d-h5K8ln_PF5A";
     
@@ -700,6 +754,7 @@
     };
 
     let detailedGoalsCache = {};
+    let nextMatchDateTime = null;
 
     function getTeamHtml(teamName, alignRight = false, customClass = "", isClickable = false, goals = []) {
         let logoUrl = VEREINS_LOGOS[teamName];
@@ -780,7 +835,8 @@
                         time: m.matchDateTime ? m.matchDateTime.split('T')[1].substring(0, 5) : '',
                         homeScore: homeScore,
                         awayScore: awayScore,
-                        matchIsFinished: m.matchIsFinished || (homeScore !== null && awayScore !== null)
+                        matchIsFinished: m.matchIsFinished || (homeScore !== null && awayScore !== null),
+                        dateTime: m.matchDateTime
                     });
                 });
 
@@ -980,7 +1036,100 @@
         renderMatchdayTable();
         renderTable();
         renderSvbStats();
+        updateWidgets();
     }
+
+    function updateWidgets() {
+        let allSvsMatches = [];
+        for (let mDay in leagueData.matches) {
+            let matches = leagueData.matches[mDay];
+            if (Array.isArray(matches)) {
+                matches.forEach(m => {
+                    if (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") {
+                        allSvsMatches.push(Object.assign({ matchday: parseInt(mDay) }, m));
+                    }
+                });
+            }
+        }
+        allSvsMatches.sort((a, b) => new Date(a.dateTime || 0) - new Date(b.dateTime || 0));
+
+        let now = new Date();
+        let nextMatch = allSvsMatches.find(m => new Date(m.dateTime || 0) >= now && (!m.homeScore && m.homeScore !== 0));
+        let pastMatches = allSvsMatches.filter(m => (m.homeScore !== null && m.homeScore !== undefined) || m.matchIsFinished);
+        let lastMatch = pastMatches.length > 0 ? pastMatches[pastMatches.length - 1] : null;
+
+        // 1. Nächstes Spiel Widget mit Countdown
+        let nextWidget = document.getElementById('nextMatchWidget');
+        if (nextMatch && nextMatch.dateTime) {
+            nextMatchDateTime = new Date(nextMatch.dateTime);
+            let dt = nextMatch.date ? nextMatch.date.split('-').reverse().join('.') : '';
+            nextWidget.innerHTML = `<strong>ST ${nextMatch.matchday}</strong> — ${dt} ${nextMatch.time || ''}<br><div style="margin-top:4px; font-weight:bold;">${nextMatch.home} vs ${nextMatch.away}</div><div id="matchCountdown" style="margin-top:6px; font-size:0.8rem; color:var(--s04-gold);"></div>`;
+            updateCountdown();
+        } else {
+            nextWidget.innerHTML = "Kein anstehendes Spiel gefunden.";
+            nextMatchDateTime = null;
+        }
+
+        // 2. Letztes Pflichtspiel Widget
+        let lastWidget = document.getElementById('lastMatchWidget');
+        if (lastMatch) {
+            let dt = lastMatch.date ? lastMatch.date.split('-').reverse().join('.') : '';
+            lastWidget.innerHTML = `<strong>ST ${lastMatch.matchday}</strong> (${dt})<br><div style="margin-top:6px; font-weight:bold;">${lastMatch.home} ${lastMatch.homeScore}:${lastMatch.awayScore} ${lastMatch.away}</div>`;
+        } else {
+            lastWidget.innerHTML = "Noch kein beendetes Spiel.";
+        }
+
+        // 3. Formkurve Widget
+        let formWidget = document.getElementById('formCurveWidget');
+        if (pastMatches.length > 0) {
+            let last5 = pastMatches.slice(-5);
+            let badges = last5.map(m => {
+                let isHome = m.home === "SV Scherpenberg";
+                let myG = isHome ? m.homeScore : m.awayScore;
+                let oppG = isHome ? m.awayScore : m.homeScore;
+                if (myG > oppG) return '<span style="background:#2ea043; color:#fff; padding:2px 6px; border-radius:3px; font-weight:bold;">S</span>';
+                else if (myG === oppG) return '<span style="background:#e3b341; color:#000; padding:2px 6px; border-radius:3px; font-weight:bold;">U</span>';
+                else return '<span style="background:#f85149; color:#fff; padding:2px 6px; border-radius:3px; font-weight:bold;">N</span>';
+            }).join(' ');
+            formWidget.innerHTML = `<div style="display:flex; gap:6px; align-items:center; margin-bottom:4px;">${badges}</div><span style="font-size:0.75rem; color:var(--text-muted)">Letzte ${last5.length} Pflichtspiele</span>`;
+        }
+
+        // 4. Heim vs. Auswärts Widget
+        let homeW = {p:0, s:0, u:0, n:0, pts:0};
+        let awayW = {p:0, s:0, u:0, n:0, pts:0};
+        pastMatches.forEach(m => {
+            let isHome = m.home === "SV Scherpenberg";
+            let myG = isHome ? m.homeScore : m.awayScore;
+            let oppG = isHome ? m.awayScore : m.homeScore;
+            let obj = isHome ? homeW : awayW;
+            obj.p++;
+            if (myG > oppG) { obj.s++; obj.pts += 3; }
+            else if (myG === oppG) { obj.u++; obj.pts += 1; }
+            else { obj.n++; }
+        });
+        document.getElementById('homeAwayWidget').innerHTML = `Heim: ${homeW.s}S - ${homeW.u}U - ${homeW.n}N (${homeW.pts} Pkt)<br>Auswärts: ${awayW.s}S - ${awayW.u}U - ${awayW.n}N (${awayW.pts} Pkt)`;
+    }
+
+    function updateCountdown() {
+        if (!nextMatchDateTime) return;
+        let now = new Date();
+        let diff = nextMatchDateTime - now;
+        let cdElem = document.getElementById('matchCountdown');
+        if (!cdElem) return;
+
+        if (diff <= 0) {
+            cdElem.textContent = "🔴 Spiel läuft oder hat begonnen!";
+            return;
+        }
+
+        let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        cdElem.textContent = `⏳ Noch ${days}T ${hours}Std ${minutes}Min ${seconds}Sek`;
+    }
+    setInterval(updateCountdown, 1000);
 
     async function renderMatchdayTable() {
         let tbody = document.getElementById('matchdayTableBody');
