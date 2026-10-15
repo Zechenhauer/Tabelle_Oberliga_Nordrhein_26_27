@@ -302,6 +302,127 @@
 
         .svs-highlight { color: var(--svs-bright-blue) !important; font-weight: bold; }
 
+        /* MODERNE SPIELTAGS-KACHELN GRID */
+        .matchday-tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .match-tile {
+            background: #161b22;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: border-color 0.2s;
+        }
+        
+        /* Deutlichere Hervorhebung für SV Scherpenberg Spiele */
+        .match-tile.svs-match-tile {
+            border: 2px solid var(--svs-bright-blue);
+            background: linear-gradient(135deg, #161b22 0%, rgba(88, 166, 255, 0.08) 100%);
+            box-shadow: 0 6px 16px rgba(88, 166, 255, 0.15);
+        }
+
+        .match-tile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .match-status-badge {
+            background: #21262d;
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            border: 1px solid var(--border-color);
+            letter-spacing: 0.5px;
+        }
+        .match-status-badge.live {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--accent-red);
+            border-color: rgba(248, 81, 73, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+        .match-status-badge.ended {
+            background: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+            border-color: rgba(46, 160, 67, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .match-row-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+        .match-row-item.winner-row {
+            border-color: rgba(46, 160, 67, 0.5);
+            background: rgba(46, 160, 67, 0.05);
+        }
+
+        .match-team-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .team-logo {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .clickable-team {
+            cursor: pointer;
+            transition: color 0.2s, text-decoration 0.2s;
+        }
+        .clickable-team:hover { color: #ffffff; text-decoration: underline; }
+
+        .match-score-box {
+            background: #21262d;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 0.95rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            min-width: 36px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .winner-row .match-score-box {
+            background: #2ea043;
+            color: #fff;
+            border-color: #3fb950;
+        }
+
+        .match-goals-container {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            border-top: 1px dashed var(--border-color);
+            padding-top: 6px;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
         .table-container {
             width: 100%;
             overflow-x: auto;
@@ -338,17 +459,6 @@
             gap: 8px;
         }
         .team-cell.right { justify-content: flex-end; }
-        .team-logo {
-            width: 22px;
-            height: 22px;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-        .clickable-team {
-            cursor: pointer;
-            transition: color 0.2s, text-decoration 0.2s;
-        }
-        .clickable-team:hover { color: #ffffff; text-decoration: underline; }
 
         .footer-action-row {
             display: flex;
@@ -537,7 +647,7 @@
         </div>
     </div>
 
-    <!-- SPIELTAGS-TABELLE -->
+    <!-- SPIELTAGS-KACHELN -->
     <div class="section-box">
         <div class="section-header" id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</div>
         <div class="matchday-controls">
@@ -545,20 +655,8 @@
             <strong id="matchdayDisplay" style="color: var(--svs-bright-blue); font-size: 1.1rem;">Spieltag 1</strong>
             <button class="matchday-btn" onclick="changeMatchday(1)">Nächster Spieltag ▶</button>
         </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 130px;">Termin</th>
-                        <th style="text-align: right;">Heimmannschaft</th>
-                        <th style="text-align: center; width: 140px;">Ergebnis</th>
-                        <th>Gastmannschaft</th>
-                    </tr>
-                </thead>
-                <tbody id="matchdayTableBody">
-                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Spieldaten von OpenLigaDB (OL1/2026)...</td></tr>
-                </tbody>
-            </table>
+        <div class="matchday-tiles-grid" id="matchdayTilesContainer">
+            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 20px;">Lade Spieldaten von OpenLigaDB (OL1/2026)...</div>
         </div>
     </div>
 
@@ -775,46 +873,13 @@
     let detailedGoalsCache = {};
     let nextMatchDateTime = null;
 
-    function getTeamHtml(teamName, alignRight = false, customClass = "", isClickable = false, goals = []) {
+    function getTeamLogoUrl(teamName) {
         let logoUrl = VEREINS_LOGOS[teamName];
         if (!logoUrl) {
             let foundKey = Object.keys(VEREINS_LOGOS).find(k => k.toLowerCase().includes(teamName.toLowerCase()) || teamName.toLowerCase().includes(k.toLowerCase()));
             logoUrl = foundKey ? VEREINS_LOGOS[foundKey] : "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/scherpenberg.png";
         }
-
-        const alignmentClass = alignRight ? "team-cell right" : "team-cell";
-        const clickAttr = isClickable ? `onclick="openTeamMatchesModal('${teamName}')" title="Alle Spiele von ${teamName} anzeigen"` : '';
-        const nameClass = (isClickable ? "clickable-team " : "") + customClass;
-        
-        let goalsHtml = '';
-        if (goals && goals.length > 0) {
-            let alignmentStyle = alignRight ? 'text-align: right;' : 'text-align: left;';
-            let indentStyle = alignRight ? 'padding-right: 30px;' : 'padding-left: 30px;';
-            let goalsText = goals.join('<br>');
-            goalsHtml = `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; line-height: 1.3; ${alignmentStyle} ${indentStyle}">${goalsText}</div>`;
-        }
-
-        if (alignRight) {
-            return `
-                <div style="display: flex; flex-direction: column;">
-                    <div class="${alignmentClass}">
-                        <span class="${nameClass}" ${clickAttr}>${teamName}</span>
-                        <img src="${logoUrl}" alt="${teamName}" class="team-logo">
-                    </div>
-                    ${goalsHtml}
-                </div>
-            `;
-        } else {
-            return `
-                <div style="display: flex; flex-direction: column;">
-                    <div class="${alignmentClass}">
-                        <img src="${logoUrl}" alt="${teamName}" class="team-logo">
-                        <span class="${nameClass}" ${clickAttr}>${teamName}</span>
-                    </div>
-                    ${goalsHtml}
-                </div>
-            `;
-        }
+        return logoUrl;
     }
 
     async function fetchOpenLigaDbData() {
@@ -869,15 +934,13 @@
         }
     }
 
-    async function fetchMatchDetails(matchID) {
+    async function fetchMatchDetails(matchID, homeTeamName, awayTeamName) {
         if (detailedGoalsCache[matchID]) return detailedGoalsCache[matchID];
         try {
             let res = await fetch(`https://api.openligadb.de/getmatchdata/${matchID}`);
             let matchData = await res.json();
             
-            let homeGoals = [];
-            let awayGoals = [];
-            
+            let goalsList = [];
             let rawGoals = matchData.goals || matchData.matchGoals || [];
             if (Array.isArray(rawGoals)) {
                 rawGoals.sort((a, b) => (a.matchMinute || 0) - (b.matchMinute || 0));
@@ -889,7 +952,6 @@
                     let name = g.goalGetterName || "Tor";
                     let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : '';
                     let minStr = min !== '' ? `${min}''` : '';
-                    let goalText = `⚽ ${name} (${minStr})`;
                     
                     let currH = g.scoreTeam1 ?? prevH;
                     let currA = g.scoreTeam2 ?? prevA;
@@ -910,18 +972,14 @@
                     prevH = currH;
                     prevA = currA;
 
-                    if (isHomeGoal) {
-                        homeGoals.push(goalText);
-                    } else {
-                        awayGoals.push(goalText);
-                    }
+                    let scoringTeam = isHomeGoal ? homeTeamName : awayTeamName;
+                    goalsList.push(`⚽ <strong>${scoringTeam}:</strong> ${name} (${minStr})`);
                 });
             }
-            let details = { home: homeGoals, away: awayGoals };
-            detailedGoalsCache[matchID] = details;
-            return details;
+            detailedGoalsCache[matchID] = goalsList;
+            return goalsList;
         } catch (e) {
-            return { home: [], away: [] };
+            return [];
         }
     }
 
@@ -1052,7 +1110,7 @@
         document.getElementById('matchdayTableHeader').textContent = `Spieltag ${leagueData.currentMatchday} — Spiele & Ergebnisse`;
         document.getElementById('visitorCountDisplay').textContent = leagueData.visitorCount || 1;
         
-        renderMatchdayTable();
+        renderMatchdayTiles();
         renderTable();
         renderSvbStats();
         updateWidgets();
@@ -1152,41 +1210,83 @@
     }
     setInterval(updateCountdown, 1000);
 
-    async function renderMatchdayTable() {
-        let tbody = document.getElementById('matchdayTableBody');
-        tbody.innerHTML = '';
+    async function renderMatchdayTiles() {
+        let container = document.getElementById('matchdayTilesContainer');
+        container.innerHTML = '';
         let existingMatches = leagueData.matches[leagueData.currentMatchday] || [];
 
         if (existingMatches.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele für Spieltag ${leagueData.currentMatchday} bei OpenLigaDB gefunden.</td></tr>`;
+            container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele für Spieltag ${leagueData.currentMatchday} bei OpenLigaDB gefunden.</div>`;
             return;
         }
 
         for (let m of existingMatches) {
             let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
             let formattedDate = m.date ? m.date.split('-').reverse().join('.') : '-';
-            let timeStr = m.time ? ` ${m.time} Uhr` : '';
+            let timeStr = m.time ? `${m.time} Uhr` : '';
             
+            let isSvsMatch = (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg");
             let homeClass = m.home === "SV Scherpenberg" ? 'svs-highlight' : '';
             let awayClass = m.away === "SV Scherpenberg" ? 'svs-highlight' : '';
 
-            let resultDisplay = hasResult 
-                ? `<strong>${m.homeScore}:${m.awayScore}</strong><div style="font-size: 0.7rem; color: #3fb950; font-weight: normal; margin-top: 2px;">(Endstand)</div>` 
-                : `<span style="color: var(--text-muted); font-style: italic;">vs</span>`;
-
-            let matchGoals = { home: [], away: [] };
+            // Status Badge ermitteln
+            let statusBadgeHtml = `<span class="match-status-badge">ANSETZUNG</span>`;
             if (hasResult) {
-                matchGoals = await fetchMatchDetails(m.matchID);
+                statusBadgeHtml = `<span class="match-status-badge ended">ENDE</span>`;
+            } else {
+                let matchDt = m.dateTime ? new Date(m.dateTime) : null;
+                let now = new Date();
+                if (matchDt && matchDt.toDateString() === now.toDateString() && now >= matchDt) {
+                    statusBadgeHtml = `<span class="match-status-badge live">● LIVE</span>`;
+                }
             }
 
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-size: 0.8rem; color: var(--svs-bright-blue);">${formattedDate}${timeStr}</td>
-                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass, false, matchGoals.home)}</td>
-                <td style="text-align: center; vertical-align: middle;">${resultDisplay}</td>
-                <td style="text-align: left;">${getTeamHtml(m.away, false, awayClass, false, matchGoals.away)}</td>
+            let homeWinner = hasResult && m.homeScore > m.awayScore;
+            let awayWinner = hasResult && m.awayScore > m.homeScore;
+
+            let homeRowClass = homeWinner ? 'match-row-item winner-row' : 'match-row-item';
+            let awayRowClass = awayWinner ? 'match-row-item winner-row' : 'match-row-item';
+
+            let homeNameStyle = homeWinner ? 'color: #3fb950; font-weight: bold;' : (m.home === "SV Scherpenberg" ? 'color: var(--svs-bright-blue); font-weight: bold;' : '');
+            let awayNameStyle = awayWinner ? 'color: #3fb950; font-weight: bold;' : (m.away === "SV Scherpenberg" ? 'color: var(--svs-bright-blue); font-weight: bold;' : '');
+
+            let homeScoreDisplay = hasResult ? m.homeScore : '-';
+            let awayScoreDisplay = hasResult ? m.awayScore : '-';
+
+            let matchGoals = [];
+            if (hasResult) {
+                matchGoals = await fetchMatchDetails(m.matchID, m.home, m.away);
+            }
+
+            let goalsHtml = '';
+            if (matchGoals.length > 0) {
+                goalsHtml = `<div class="match-goals-container">${matchGoals.join('<br>')}</div>`;
+            }
+
+            let tileDiv = document.createElement('div');
+            tileDiv.className = isSvsMatch ? 'match-tile svs-match-tile' : 'match-tile';
+            tileDiv.innerHTML = `
+                <div class="match-tile-header">
+                    <span>${formattedDate}${timeStr ? ' — ' + timeStr : ''}</span>
+                    ${statusBadgeHtml}
+                </div>
+                <div class="${homeRowClass}">
+                    <div class="match-team-info">
+                        <img src="${getTeamLogoUrl(m.home)}" alt="${m.home}" class="team-logo">
+                        <span class="clickable-team" style="${homeNameStyle}" onclick="openTeamMatchesModal('${m.home}')">${m.home}</span>
+                    </div>
+                    <div class="match-score-box">${homeScoreDisplay}</div>
+                </div>
+                <div class="${awayRowClass}">
+                    <div class="match-team-info">
+                        <img src="${getTeamLogoUrl(m.away)}" alt="${m.away}" class="team-logo">
+                        <span class="clickable-team" style="${awayNameStyle}" onclick="openTeamMatchesModal('${m.away}')">${m.away}</span>
+                    </div>
+                    <div class="match-score-box">${awayScoreDisplay}</div>
+                </div>
+                ${goalsHtml}
             `;
-            tbody.appendChild(tr);
+            container.appendChild(tileDiv);
         }
     }
 
@@ -1256,15 +1356,13 @@
                     else badgeClass = 'svs-badge-loss';
                 }
 
-                let homeHtml = getTeamHtml(m.home, true);
-                let awayHtml = getTeamHtml(m.away, false);
+                let homeHtml = `<div class="team-cell right"><span>${m.home}</span><img src="${getTeamLogoUrl(m.home)}" class="team-logo"></div>`;
+                let awayHtml = `<div class="team-cell"><img src="${getTeamLogoUrl(m.away)}" class="team-logo"><span>${m.away}</span></div>`;
 
                 if (isHome && hasResult) {
-                    const logoUrl = VEREINS_LOGOS[m.home] || "";
-                    homeHtml = `<div class="team-cell right"><span class="${badgeClass}">${m.home}</span><img src="${logoUrl}" class="team-logo"></div>`;
+                    homeHtml = `<div class="team-cell right"><span class="${badgeClass}">${m.home}</span><img src="${getTeamLogoUrl(m.home)}" class="team-logo"></div>`;
                 } else if (!isHome && hasResult) {
-                    const logoUrl = VEREINS_LOGOS[m.away] || "";
-                    awayHtml = `<div class="team-cell"><img src="${logoUrl}" class="team-logo"><span class="${badgeClass}">${m.away}</span></div>`;
+                    awayHtml = `<div class="team-cell"><img src="${getTeamLogoUrl(m.away)}" class="team-logo"><span class="${badgeClass}">${m.away}</span></div>`;
                 }
 
                 let resultDisplay = hasResult ? `<strong>${m.homeScore}:${m.awayScore}</strong>` : `<span style="color:var(--text-muted);">-:-</span>`;
@@ -1348,7 +1446,7 @@
 
         data.forEach((s, idx) => {
             let tr = document.createElement('tr');
-            let teamDisplayHtml = getTeamHtml(s.team, false, "", false);
+            let teamDisplayHtml = `<div style="display: flex; align-items: center; gap: 6px;"><img src="${getTeamLogoUrl(s.team)}" class="team-logo" style="width:16px; height:16px;"><span>${s.team}</span></div>`;
             
             let actionsHtml = '';
             if (isAdminUnlocked) {
@@ -1526,7 +1624,12 @@
 
             tr.innerHTML = `
                 <td><strong>${idx + 1}.</strong></td>
-                <td>${getTeamHtml(s.name, false, "", true)}</td>
+                <td>
+                    <div class="team-cell">
+                        <img src="${getTeamLogoUrl(s.name)}" alt="${s.name}" class="team-logo">
+                        <span class="clickable-team" onclick="openTeamMatchesModal('${s.name}')">${s.name}</span>
+                    </div>
+                </td>
                 <td style="text-align: center;">${s.played}</td>
                 <td style="text-align: center;">${s.won}</td>
                 <td style="text-align: center;">${s.draw}</td>
