@@ -275,7 +275,7 @@
         td {
             padding: 10px 8px;
             border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
+            vertical-align: top;
         }
         tr:hover { background-color: rgba(255,255,255,0.02); }
 
@@ -362,6 +362,31 @@
             align-items: center;
         }
         
+        .admin-card {
+            background: #161b22;
+            border: 1px solid var(--svs-bright-blue);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-blue-hover); }
+
         .btn-danger {
             background: transparent;
             border: none;
@@ -370,6 +395,27 @@
             font-weight: bold;
             font-size: 1rem;
         }
+        .btn-edit {
+            background: transparent;
+            border: none;
+            color: var(--svs-bright-blue);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-right: 5px;
+        }
+        .btn-plus {
+            background: rgba(46, 160, 67, 0.2);
+            border: 1px solid #3fb950;
+            color: #3fb950;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+            margin-right: 4px;
+        }
+        .btn-plus:hover { background: rgba(46, 160, 67, 0.4); }
 
         .admin-box {
             display: none;
@@ -395,7 +441,7 @@
 
 <div class="container">
     <div class="banner-box">
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner%20sv%20scherpenberg.png" alt="SV Scherpenberg Banner" class="banner-image">
+        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/logos_scherpenberg/banner%20sv%20scherpenberg.png" alt="SV Scherpenberg Banner" class="banner-image">
         <div class="banner-footer">
             <h1 class="banner-title">SV Scherpenberg <span>1921</span></h1>
         </div>
@@ -431,7 +477,7 @@
                     <tr>
                         <th style="width: 130px;">Termin</th>
                         <th style="text-align: right;">Heimmannschaft</th>
-                        <th style="text-align: center; width: 100px;">Ergebnis</th>
+                        <th style="text-align: center; width: 140px;">Ergebnis</th>
                         <th>Gastmannschaft</th>
                     </tr>
                 </thead>
@@ -471,6 +517,15 @@
         </div>
     </div>
 
+    <!-- ADMIN BEREICH (HAUPTSEITE) -->
+    <div class="admin-card" id="adminCard">
+        <div style="font-weight: bold; color: var(--svs-bright-blue); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>✏️ Admin-Testbereich</span>
+            <span style="font-size: 0.7rem; color: #3fb950;">● Admin-Modus Aktiv</span>
+        </div>
+        <button class="btn" style="background: #238636;" onclick="alert('Test-Funktion bereit')">🚀 Test-Aktion ausführen</button>
+    </div>
+
     <!-- FOOTER -->
     <div class="footer-action-row">
         <div class="visitor-left-group">
@@ -479,6 +534,7 @@
             </div>
             <button class="chart-trigger-btn" onclick="toggleVisitorChart()">📊 Aufruf-Diagramm</button>
         </div>
+        <button class="btn-admin-toggle" onclick="toggleAdminMode()" title="Admin-Modus aktivieren">🔒 Admin-Zugang</button>
     </div>
 
     <div id="visitorChartContainer">
@@ -523,13 +579,12 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
             <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
                 <span>⚽ Torjäger — Oberliga Niederrhein</span>
-                <button class="btn-admin-toggle" onclick="toggleAdminMode()" title="Admin-Modus aktivieren">🔒 Admin</button>
             </div>
             <button class="btn-danger" onclick="closeLeagueScorersModal()">✕</button>
         </div>
         <div class="modal-body">
             <div class="admin-box" id="adminBoxLeague">
-                <div style="font-size: 0.8rem; font-weight: bold; color: var(--svs-bright-blue); margin-bottom: 8px;">➕ Torschütze hinzufügen / bearbeiten (Admin):</div>
+                <div style="font-size: 0.8rem; font-weight: bold; color: var(--svs-bright-blue); margin-bottom: 8px;">➕ Torschütze hinzufügen (Admin):</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                     <input type="text" id="manualPlayerNameLeague" placeholder="Spielername" style="flex: 2; min-width: 130px;">
                     <select id="manualTeamSelectLeague" style="flex: 2; min-width: 130px;"></select>
@@ -547,7 +602,7 @@
                             <th>Spieler</th>
                             <th style="text-align: center; width: 50px;">Sp</th>
                             <th style="text-align: center; width: 60px;">Tore</th>
-                            <th style="width: 40px; text-align: center;" id="actionHeaderCol" style="display: none;">Aktion</th>
+                            <th style="width: 110px; text-align: center;">Aktion</th>
                         </tr>
                     </thead>
                     <tbody id="leagueScorersModalBody">
@@ -566,7 +621,6 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
             <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
                 <span>⚽ SVS Torjäger — SV Scherpenberg</span>
-                <button class="btn-admin-toggle" onclick="toggleAdminMode()" title="Admin-Modus aktivieren">🔒 Admin</button>
             </div>
             <button class="btn-danger" onclick="closeSvsScorersModal()">✕</button>
         </div>
@@ -589,7 +643,7 @@
                             <th>Spieler</th>
                             <th style="text-align: center; width: 50px;">Sp</th>
                             <th style="text-align: center; width: 60px;">Tore</th>
-                            <th style="width: 40px; text-align: center;" id="actionHeaderColSvs" style="display: none;">Aktion</th>
+                            <th style="width: 110px; text-align: center;">Aktion</th>
                         </tr>
                     </thead>
                     <tbody id="svsScorersModalBody">
@@ -608,6 +662,7 @@
     let visitorChartInstance = null;
     let isChartOpen = false;
     let isAdminUnlocked = false;
+    const ADMIN_PASSWORD = "SVS2026";
 
     // Supabase Client
     const SUPABASE_URL = "https://lhusylpjnujlqomougmg.supabase.co";
@@ -644,7 +699,9 @@
         matches: {}
     };
 
-    function getTeamHtml(teamName, alignRight = false, customClass = "", isClickable = false) {
+    let detailedGoalsCache = {};
+
+    function getTeamHtml(teamName, alignRight = false, customClass = "", isClickable = false, goals = []) {
         let logoUrl = VEREINS_LOGOS[teamName];
         if (!logoUrl) {
             let foundKey = Object.keys(VEREINS_LOGOS).find(k => k.toLowerCase().includes(teamName.toLowerCase()) || teamName.toLowerCase().includes(k.toLowerCase()));
@@ -655,18 +712,32 @@
         const clickAttr = isClickable ? `onclick="openTeamMatchesModal('${teamName}')" title="Alle Spiele von ${teamName} anzeigen"` : '';
         const nameClass = (isClickable ? "clickable-team " : "") + customClass;
         
+        let goalsHtml = '';
+        if (goals && goals.length > 0) {
+            let alignmentStyle = alignRight ? 'text-align: right;' : 'text-align: left;';
+            let indentStyle = alignRight ? 'padding-right: 30px;' : 'padding-left: 30px;';
+            let goalsText = goals.join('<br>');
+            goalsHtml = `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; line-height: 1.3; ${alignmentStyle} ${indentStyle}">${goalsText}</div>`;
+        }
+
         if (alignRight) {
             return `
-                <div class="${alignmentClass}">
-                    <span class="${nameClass}" ${clickAttr}>${teamName}</span>
-                    <img src="${logoUrl}" alt="${teamName}" class="team-logo">
+                <div style="display: flex; flex-direction: column;">
+                    <div class="${alignmentClass}">
+                        <span class="${nameClass}" ${clickAttr}>${teamName}</span>
+                        <img src="${logoUrl}" alt="${teamName}" class="team-logo">
+                    </div>
+                    ${goalsHtml}
                 </div>
             `;
         } else {
             return `
-                <div class="${alignmentClass}">
-                    <img src="${logoUrl}" alt="${teamName}" class="team-logo">
-                    <span class="${nameClass}" ${clickAttr}>${teamName}</span>
+                <div style="display: flex; flex-direction: column;">
+                    <div class="${alignmentClass}">
+                        <img src="${logoUrl}" alt="${teamName}" class="team-logo">
+                        <span class="${nameClass}" ${clickAttr}>${teamName}</span>
+                    </div>
+                    ${goalsHtml}
                 </div>
             `;
         }
@@ -702,6 +773,7 @@
                     }
 
                     matchesMap[mDay].push({
+                        matchID: m.matchID,
                         home: homeTeam,
                         away: awayTeam,
                         date: m.matchDateTime ? m.matchDateTime.split('T')[0] : '',
@@ -719,6 +791,62 @@
             }
         } catch (e) {
             console.error("Fehler beim Abruf von OpenLigaDB:", e);
+        }
+    }
+
+    async function fetchMatchDetails(matchID) {
+        if (detailedGoalsCache[matchID]) return detailedGoalsCache[matchID];
+        try {
+            let res = await fetch(`https://api.openligadb.de/getmatchdata/${matchID}`);
+            let matchData = await res.json();
+            
+            let homeGoals = [];
+            let awayGoals = [];
+            
+            let rawGoals = matchData.goals || matchData.matchGoals || [];
+            if (Array.isArray(rawGoals)) {
+                rawGoals.sort((a, b) => (a.matchMinute || 0) - (b.matchMinute || 0));
+
+                let prevH = 0;
+                let prevA = 0;
+
+                rawGoals.forEach(g => {
+                    let name = g.goalGetterName || "Tor";
+                    let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : '';
+                    let minStr = min !== '' ? `${min}''` : '';
+                    let goalText = `⚽ ${name} (${minStr})`;
+                    
+                    let currH = g.scoreTeam1 ?? prevH;
+                    let currA = g.scoreTeam2 ?? prevA;
+
+                    let isHomeGoal = false;
+                    if (currH > prevH) {
+                        isHomeGoal = true;
+                    } else if (currA > prevA) {
+                        isHomeGoal = false;
+                    } else if (matchData.team1 && g.teamID === matchData.team1.teamID) {
+                        isHomeGoal = true;
+                    } else if (matchData.team2 && g.teamID === matchData.team2.teamID) {
+                        isHomeGoal = false;
+                    } else {
+                        isHomeGoal = true;
+                    }
+
+                    prevH = currH;
+                    prevA = currA;
+
+                    if (isHomeGoal) {
+                        homeGoals.push(goalText);
+                    } else {
+                        awayGoals.push(goalText);
+                    }
+                });
+            }
+            let details = { home: homeGoals, away: awayGoals };
+            detailedGoalsCache[matchID] = details;
+            return details;
+        } catch (e) {
+            return { home: [], away: [] };
         }
     }
 
@@ -832,6 +960,7 @@
 
     function populateTeamSelect() {
         let select = document.getElementById('manualTeamSelectLeague');
+        if (!select) return;
         select.innerHTML = '';
         let teamsList = leagueData.teams.length > 0 ? leagueData.teams : Object.keys(VEREINS_LOGOS);
         teamsList.sort().forEach(t => {
@@ -853,7 +982,7 @@
         renderSvbStats();
     }
 
-    function renderMatchdayTable() {
+    async function renderMatchdayTable() {
         let tbody = document.getElementById('matchdayTableBody');
         tbody.innerHTML = '';
         let existingMatches = leagueData.matches[leagueData.currentMatchday] || [];
@@ -863,7 +992,7 @@
             return;
         }
 
-        existingMatches.forEach(m => {
+        for (let m of existingMatches) {
             let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
             let formattedDate = m.date ? m.date.split('-').reverse().join('.') : '-';
             let timeStr = m.time ? ` ${m.time} Uhr` : '';
@@ -875,15 +1004,20 @@
                 ? `<strong>${m.homeScore}:${m.awayScore}</strong><div style="font-size: 0.7rem; color: #3fb950; font-weight: normal; margin-top: 2px;">(Endstand)</div>` 
                 : `<span style="color: var(--text-muted); font-style: italic;">vs</span>`;
 
+            let matchGoals = { home: [], away: [] };
+            if (hasResult) {
+                matchGoals = await fetchMatchDetails(m.matchID);
+            }
+
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-size: 0.8rem; color: var(--svs-bright-blue);">${formattedDate}${timeStr}</td>
-                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass, false)}</td>
+                <td style="text-align: right;">${getTeamHtml(m.home, true, homeClass, false, matchGoals.home)}</td>
                 <td style="text-align: center; vertical-align: middle;">${resultDisplay}</td>
-                <td style="text-align: left;">${getTeamHtml(m.away, false, awayClass, false)}</td>
+                <td style="text-align: left;">${getTeamHtml(m.away, false, awayClass, false, matchGoals.away)}</td>
             `;
             tbody.appendChild(tr);
-        });
+        }
     }
 
     function renderSvbStats() {
@@ -1005,8 +1139,9 @@
 
     function toggleAdminMode() {
         let pwd = prompt("Bitte Admin-Passwort eingeben:");
-        if (pwd === "SVS2026") {
+        if (pwd === ADMIN_PASSWORD) {
             isAdminUnlocked = !isAdminUnlocked;
+            document.getElementById('adminCard').style.display = isAdminUnlocked ? 'block' : 'none';
             document.getElementById('adminBoxLeague').style.display = isAdminUnlocked ? 'block' : 'none';
             document.getElementById('adminBoxSvs').style.display = isAdminUnlocked ? 'block' : 'none';
             alert(isAdminUnlocked ? "Admin-Modus aktiviert!" : "Admin-Modus gesperrt.");
@@ -1044,11 +1179,17 @@
         data.forEach((s, idx) => {
             let tr = document.createElement('tr');
             let teamDisplayHtml = getTeamHtml(s.team, false, "", false);
-            let deleteBtnHtml = isAdminUnlocked ? `<button class="btn-danger" style="font-size: 0.9rem;" onclick="deleteScorerFromSupabase(${s.id}, ${onlySvs})" title="Löschen">🗑️</button>` : '';
+            
+            let actionsHtml = '';
+            if (isAdminUnlocked) {
+                actionsHtml = `
+                    <button class="btn-plus" onclick="addGoalToPlayer(${s.id}, ${s.tore}, ${onlySvs})" title="1 Tor hinzufügen (+1)">+1 ⚽</button>
+                    <button class="btn-edit" onclick="editScorer(${s.id}, '${s.name}', ${s.tore}, ${onlySvs})" title="Tore manuell anpassen">✏️</button>
+                    <button class="btn-danger" onclick="deleteScorerFromSupabase(${s.id}, ${onlySvs})" title="Löschen">🗑️</button>
+                `;
+            }
 
             let rawRank = idx + 1;
-            // In der Gesamtliste werden Nummern oberhalb von 10 (wie 11, 12, 30 usw.) leer gelassen.
-            // In der reinen SVS-Liste (onlySvs) zählt es ganz normal von 1 aufwärts.
             let rankDisplay = onlySvs ? rawRank : (rawRank <= 10 ? rawRank : '');
 
             tr.innerHTML = `
@@ -1059,10 +1200,45 @@
                 </td>
                 <td style="text-align: center; color: var(--text-color);">${s.spiele}</td>
                 <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.1rem;">${s.tore}</td>
-                <td style="text-align: center;">${isAdminUnlocked ? deleteBtnHtml : ''}</td>
+                <td style="text-align: center; white-space: nowrap;">${actionsHtml}</td>
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    async function addGoalToPlayer(id, currentGoals, onlySvs) {
+        let newGoals = currentGoals + 1;
+        let { error } = await supabaseClient
+            .from('oberliga_torschuetzen')
+            .update({ tore: newGoals })
+            .eq('id', id);
+
+        if (error) {
+            alert("Fehler beim Aktualisieren: " + error.message);
+        } else {
+            await loadScorersFromSupabase(onlySvs);
+        }
+    }
+
+    async function editScorer(id, currentName, currentGoals, onlySvs) {
+        let input = prompt(`Neue Anzahl Tore für ${currentName} eingeben:`, currentGoals);
+        if (input === null) return;
+        let newGoals = parseInt(input);
+        if (isNaN(newGoals) || newGoals < 0) {
+            alert("Bitte eine gültige Zahl eingeben!");
+            return;
+        }
+
+        let { error } = await supabaseClient
+            .from('oberliga_torschuetzen')
+            .update({ tore: newGoals })
+            .eq('id', id);
+
+        if (error) {
+            alert("Fehler beim Speichern: " + error.message);
+        } else {
+            await loadScorersFromSupabase(onlySvs);
+        }
     }
 
     async function saveScorerToSupabase(mode) {
