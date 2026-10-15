@@ -21,6 +21,7 @@
             --primary-blue-hover: #16365c;
             --accent-green: #2ea043;
             --accent-red: #f85149;
+            --accent-orange: #f0883e;
             --svs-bright-blue: #58a6ff;
             --s04-gold: #ffcc00;
         }
@@ -321,11 +322,18 @@
             transition: border-color 0.2s;
         }
         
-        /* Deutlichere Hervorhebung für SV Scherpenberg Spiele */
+        /* Hervorhebung für SV Scherpenberg Spiele (Priorität vor Unentschieden) */
         .match-tile.svs-match-tile {
             border: 2px solid var(--svs-bright-blue);
             background: linear-gradient(135deg, #161b22 0%, rgba(88, 166, 255, 0.08) 100%);
             box-shadow: 0 6px 16px rgba(88, 166, 255, 0.15);
+        }
+
+        /* Neuer oranger Rahmen bei Unentschieden (Remis) */
+        .match-tile.draw-match-tile {
+            border: 2px solid var(--accent-orange);
+            background: linear-gradient(135deg, #161b22 0%, rgba(240, 136, 62, 0.08) 100%);
+            box-shadow: 0 6px 16px rgba(240, 136, 62, 0.15);
         }
 
         .match-tile-header {
@@ -942,7 +950,7 @@
             
             let goalsList = [];
             let rawGoals = matchData.goals || matchData.matchGoals || [];
-            if (Array.isArray(rawGoals)) {
+            if (Array.isArray(rawGoals) && rawGoals.length > 0) {
                 rawGoals.sort((a, b) => (a.matchMinute || 0) - (b.matchMinute || 0));
 
                 let prevH = 0;
@@ -1226,8 +1234,7 @@
             let timeStr = m.time ? `${m.time} Uhr` : '';
             
             let isSvsMatch = (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg");
-            let homeClass = m.home === "SV Scherpenberg" ? 'svs-highlight' : '';
-            let awayClass = m.away === "SV Scherpenberg" ? 'svs-highlight' : '';
+            let isDraw = hasResult && (m.homeScore === m.awayScore);
 
             // Status Badge ermitteln
             let statusBadgeHtml = `<span class="match-status-badge">ANSETZUNG</span>`;
@@ -1264,7 +1271,15 @@
             }
 
             let tileDiv = document.createElement('div');
-            tileDiv.className = isSvsMatch ? 'match-tile svs-match-tile' : 'match-tile';
+            // Priorität: SVS-Spiel bekommt Blauen Rahmen, Unentschieden (ohne SVS Beteiligung) bekommt orangen Rahmen
+            if (isSvsMatch) {
+                tileDiv.className = 'match-tile svs-match-tile';
+            } else if (isDraw) {
+                tileDiv.className = 'match-tile draw-match-tile';
+            } else {
+                tileDiv.className = 'match-tile';
+            }
+
             tileDiv.innerHTML = `
                 <div class="match-tile-header">
                     <span>${formattedDate}${timeStr ? ' — ' + timeStr : ''}</span>
