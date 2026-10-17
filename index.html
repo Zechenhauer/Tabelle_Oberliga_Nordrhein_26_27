@@ -961,8 +961,8 @@
                     let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : '';
                     let minStr = min !== '' ? `${min}''` : '';
                     
-                    let currH = g.scoreTeam1 ?? prevH;
-                    let currA = g.scoreTeam2 ?? prevA;
+                    let currH = g.scoreTeam1 ?? (prevH + (g.teamID === matchData.team1?.teamID ? 1 : 0));
+                    let currA = g.scoreTeam2 ?? (prevA + (g.teamID === matchData.team2?.teamID ? 1 : 0));
 
                     let isHomeGoal = false;
                     if (currH > prevH) {
@@ -977,11 +977,17 @@
                         isHomeGoal = true;
                     }
 
+                    if (g.scoreTeam1 !== undefined && g.scoreTeam1 !== null) currH = g.scoreTeam1;
+                    else if (isHomeGoal) currH = prevH + 1;
+                
+                    if (g.scoreTeam2 !== undefined && g.scoreTeam2 !== null) currA = g.scoreTeam2;
+                    else if (!isHomeGoal) currA = prevA + 1;
+
                     prevH = currH;
                     prevA = currA;
 
                     let scoringTeam = isHomeGoal ? homeTeamName : awayTeamName;
-                    goalsList.push(`⚽ <strong>${scoringTeam}:</strong> ${name} (${minStr})`);
+                    goalsList.push(`⚽ <strong>[${currH}:${currA}]</strong> <strong>${scoringTeam}:</strong> ${name} (${minStr})`);
                 });
             }
             detailedGoalsCache[matchID] = goalsList;
@@ -1271,7 +1277,6 @@
             }
 
             let tileDiv = document.createElement('div');
-            // Priorität: SVS-Spiel bekommt Blauen Rahmen, Unentschieden (ohne SVS Beteiligung) bekommt orangen Rahmen
             if (isSvsMatch) {
                 tileDiv.className = 'match-tile svs-match-tile';
             } else if (isDraw) {
