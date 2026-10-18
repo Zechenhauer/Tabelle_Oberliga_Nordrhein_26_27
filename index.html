@@ -12,18 +12,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --text-color: #c9d1d9;
-            --text-muted: #8b949e;
-            --border-color: #30363d;
-            --primary-blue: #0c2340;
-            --primary-blue-hover: #16365c;
+            --bg-color: #070b19;
+            --card-bg: #0d1428;
+            --card-inner: #131c38;
+            --text-color: #f0f4f8;
+            --text-muted: #8fa3bf;
+            --border-color: #1f305e;
+            --primary-blue: #003399;
+            --primary-blue-hover: #0044cc;
             --accent-green: #2ea043;
             --accent-red: #f85149;
             --accent-orange: #f0883e;
-            --svs-bright-blue: #58a6ff;
-            --s04-gold: #ffcc00;
+            --svs-bright-blue: #388bfd;
+            --s04-gold: #ffd700;
+            --goal-cyan: #00f2fe;
         }
 
         * { box-sizing: border-box; }
@@ -41,31 +43,34 @@
             width: 100%;
             max-width: 1000px;
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid rgba(56, 139, 253, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 51, 153, 0.2);
         }
 
         .banner-box {
-            background: #000000;
+            background: #070b19;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
+            border-radius: 12px;
+            padding: 10px;
             margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .banner-image {
             width: 100%;
             height: auto;
             max-height: 450px;
-            object-fit: cover;
+            object-fit: contain;
+            border-radius: 8px;
             display: block;
         }
         .banner-footer {
-            background: #0d1117;
+            background: linear-gradient(135deg, #0d1428 0%, #002060 100%);
             border-top: 1px solid var(--border-color);
             padding: 15px;
             text-align: center;
@@ -74,13 +79,15 @@
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
+            border-radius: 0 0 8px 8px;
         }
         .banner-title {
             color: #ffffff;
-            font-size: 1.4rem;
-            font-weight: 800;
+            font-size: 1.6rem;
+            font-weight: 900;
             margin: 0;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
         .banner-title span {
             color: var(--svs-bright-blue);
@@ -88,37 +95,38 @@
 
         .subtitle {
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
             margin-bottom: 15px;
-            font-weight: bold;
+            font-weight: 600;
         }
 
         .section-box {
-            background: #0d1117;
+            background: var(--card-inner);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
 
         .section-header {
-            background-color: var(--primary-blue);
-            color: var(--svs-bright-blue);
-            border: 1px solid var(--border-color);
-            padding: 10px 15px;
-            font-weight: bold;
-            text-align: center;
+            background: linear-gradient(90deg, var(--primary-blue) 0%, #0050d0 100%);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 14px 20px;
+            font-weight: 800;
             text-transform: uppercase;
             font-size: 0.9rem;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            letter-spacing: 0.8px;
+            box-shadow: 0 6px 18px rgba(0, 51, 153, 0.4);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
 
         .header-btn-group {
@@ -128,38 +136,38 @@
         }
 
         .btn-modal-open {
-            background: var(--svs-bright-blue);
-            color: #000000;
+            background: var(--s04-gold);
+            color: #070b19;
             border: none;
-            padding: 5px 12px;
-            border-radius: 4px;
+            padding: 6px 14px;
+            border-radius: 8px;
             font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: background 0.2s;
-        }
-        .btn-modal-open:hover { background: #79c0ff; }
-
-        .btn-admin-toggle {
-            background: #21262d;
-            color: var(--svs-bright-blue);
-            border: 1px solid var(--svs-bright-blue);
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
+            font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
             transition: all 0.2s;
         }
-        .btn-admin-toggle:hover { background: var(--svs-bright-blue); color: #000; }
+        .btn-modal-open:hover { background: #ffe64d; transform: translateY(-1px); }
+
+        .btn-admin-toggle {
+            background: #131c38;
+            color: var(--svs-bright-blue);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .btn-admin-toggle:hover { border-color: var(--svs-bright-blue); color: #fff; }
 
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(4px);
+            background: rgba(7, 11, 25, 0.85);
+            backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -167,63 +175,69 @@
             padding: 15px;
         }
         .modal-card {
-            background: #161b22;
+            background: var(--card-bg);
             border: 1px solid var(--svs-bright-blue);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 18px;
+            padding: 24px;
             width: 100%;
             max-width: 650px;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 51, 153, 0.3);
         }
         .modal-body {
             overflow-y: auto;
             max-height: 70vh;
+            flex: 1;
         }
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-thumb { background: var(--svs-bright-blue); border-radius: 3px; }
 
         .svs-badge-win {
             background: rgba(46, 160, 67, 0.2);
             color: #3fb950;
             padding: 3px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             border: 1px solid rgba(46, 160, 67, 0.4);
             font-weight: bold;
         }
         .svs-badge-draw {
-            background: rgba(227, 179, 64, 0.2);
-            color: #e3b341;
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--s04-gold);
             padding: 3px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(227, 179, 64, 0.4);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
             font-weight: bold;
         }
         .svs-badge-loss {
             background: rgba(248, 81, 73, 0.2);
             color: #f85149;
             padding: 3px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             border: 1px solid rgba(248, 81, 73, 0.4);
             font-weight: bold;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
             margin-bottom: 5px;
         }
+        @media(max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        }
         .stat-card {
-            background: #161b22;
+            background: #131c38;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
+            border-radius: 10px;
+            padding: 12px 6px;
             text-align: center;
         }
         .stat-value {
-            font-size: 1.2rem;
-            font-weight: bold;
+            font-size: 1.15rem;
+            font-weight: 800;
             color: #ffffff;
             margin-top: 4px;
         }
@@ -231,109 +245,117 @@
             font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
+            font-weight: 700;
         }
 
         /* FORMVERLAUF KACHEL */
         .form-card {
-            background: #161b22;
+            background: var(--card-inner);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
         .form-card-title {
-            font-size: 0.75rem;
-            font-weight: bold;
+            font-size: 0.8rem;
+            font-weight: 800;
             color: var(--svs-bright-blue);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
         }
 
         /* 3ER GRID KACHELN */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
         .dash-card {
-            background: #0d1117;
+            background: var(--card-inner);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
         .dash-card-title {
-            font-size: 0.75rem;
-            font-weight: bold;
+            font-size: 0.8rem;
+            font-weight: 800;
             color: var(--svs-bright-blue);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .dash-card-content {
-            font-size: 0.9rem;
+            font-size: 0.95krem;
             color: var(--text-color);
+            font-weight: 500;
         }
 
         .matchday-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             font-size: 0.9rem;
+            background: #131c38;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
 
         .matchday-btn {
-            background: #21262d;
+            background: #1b2850;
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
+            font-weight: 700;
+            transition: all 0.2s;
         }
-        .matchday-btn:hover { background: var(--primary-blue-hover); border-color: var(--svs-bright-blue); }
+        .matchday-btn:hover { background: var(--primary-blue); border-color: var(--svs-bright-blue); color: #fff; }
 
         .svs-highlight { color: var(--svs-bright-blue) !important; font-weight: bold; }
 
         /* MODERNE SPIELTAGS-KACHELN GRID */
         .matchday-tiles-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+            gap: 16px;
+        }
+        @media (max-width: 768px) {
+            .matchday-tiles-grid { grid-template-columns: 1fr; }
         }
 
         .match-tile {
-            background: #161b22;
+            background: #131c38;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 15px;
+            border-radius: 12px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: border-color 0.2s;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: all 0.2s;
         }
+        .match-tile:hover { border-color: rgba(56, 139, 253, 0.4); }
         
-        /* Hervorhebung für SV Scherpenberg Spiele (Priorität vor Unentschieden) */
         .match-tile.svs-match-tile {
             border: 2px solid var(--svs-bright-blue);
-            background: linear-gradient(135deg, #161b22 0%, rgba(88, 166, 255, 0.08) 100%);
-            box-shadow: 0 6px 16px rgba(88, 166, 255, 0.15);
+            background: linear-gradient(135deg, #131c38 0%, rgba(56, 139, 253, 0.1) 100%);
+            box-shadow: 0 8px 25px rgba(56, 139, 253, 0.2);
         }
 
-        /* Neuer oranger Rahmen bei Unentschieden (Remis) */
         .match-tile.draw-match-tile {
             border: 2px solid var(--accent-orange);
-            background: linear-gradient(135deg, #161b22 0%, rgba(240, 136, 62, 0.08) 100%);
-            box-shadow: 0 6px 16px rgba(240, 136, 62, 0.15);
+            background: linear-gradient(135deg, #131c38 0%, rgba(240, 136, 62, 0.1) 100%);
+            box-shadow: 0 8px 25px rgba(240, 136, 62, 0.2);
         }
 
         .match-tile-header {
@@ -342,24 +364,24 @@
             align-items: center;
             font-size: 0.75rem;
             color: var(--text-muted);
-            font-weight: bold;
+            font-weight: 700;
             text-transform: uppercase;
         }
 
         .match-status-badge {
-            background: #21262d;
-            color: var(--text-muted);
+            background: rgba(56, 139, 253, 0.15);
+            color: var(--svs-bright-blue);
+            border: 1px solid rgba(56, 139, 253, 0.3);
             padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.68rem;
             letter-spacing: 0.5px;
         }
         .match-status-badge.live {
             background: rgba(248, 81, 73, 0.2);
             color: var(--accent-red);
             border-color: rgba(248, 81, 73, 0.4);
-            animation: pulse 1.5s infinite;
+            animation: pulse 1.2s infinite;
         }
         .match-status-badge.ended {
             background: rgba(46, 160, 67, 0.15);
@@ -368,68 +390,74 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.95); }
         }
 
         .match-row-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #0d1117;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 8px 12px;
+            background: #090e1f;
+            border: 1px solid #1b2850;
+            border-radius: 8px;
+            padding: 10px 14px;
         }
         .match-row-item.winner-row {
             border-color: rgba(46, 160, 67, 0.5);
-            background: rgba(46, 160, 67, 0.05);
+            background: rgba(46, 160, 67, 0.08);
         }
 
         .match-team-info {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
+            gap: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
         }
         .team-logo {
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             object-fit: contain;
             flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
         .clickable-team {
             cursor: pointer;
-            transition: color 0.2s, text-decoration 0.2s;
+            transition: color 0.2s;
         }
         .clickable-team:hover { color: #ffffff; text-decoration: underline; }
 
         .match-score-box {
-            background: #21262d;
+            background: #162247;
+            border: 1px solid var(--border-color);
             color: #ffffff;
-            font-weight: bold;
+            font-weight: 800;
             font-size: 0.95rem;
-            padding: 4px 10px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 6px;
             min-width: 36px;
             text-align: center;
-            border: 1px solid var(--border-color);
         }
         .winner-row .match-score-box {
-            background: #2ea043;
-            color: #fff;
+            background: rgba(46, 160, 67, 0.2);
             border-color: #3fb950;
+            color: #3fb950;
         }
 
         .match-goals-container {
-            font-size: 0.72rem;
-            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
             border-top: 1px dashed var(--border-color);
-            padding-top: 6px;
+            padding-top: 8px;
             margin-top: 2px;
-            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
+        /* Farben für Ticker-Tore */
+        .goal-item-home { color: var(--goal-cyan); }
+        .goal-item-away { color: var(--s04-gold); }
 
         .table-container {
             width: 100%;
@@ -442,24 +470,26 @@
             font-size: 0.85rem;
         }
         th {
-            background-color: var(--primary-blue);
-            color: #ffffff;
-            padding: 10px 8px;
+            background-color: #131c38;
+            color: var(--svs-bright-blue);
+            padding: 14px 12px;
             text-transform: uppercase;
             font-size: 0.75rem;
+            letter-spacing: 0.8px;
             white-space: nowrap;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--primary-blue);
         }
         td {
-            padding: 10px 8px;
+            padding: 14px 12px;
             border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
+            vertical-align: middle;
+            white-space: nowrap;
         }
-        tr:hover { background-color: rgba(255,255,255,0.02); }
+        tr:hover { background-color: rgba(56, 139, 253, 0.04); }
 
-        tr.rank-first td { background: rgba(46, 160, 67, 0.12); }
-        tr.rank-last td { background: rgba(248, 81, 73, 0.12); }
-        tr.svs-team-row td { font-weight: bold; background: rgba(88, 166, 255, 0.12); }
+        tr.rank-first td { background: rgba(56, 139, 253, 0.1); border-top: 1px solid rgba(56, 139, 253, 0.3); border-bottom: 1px solid rgba(56, 139, 253, 0.3); }
+        tr.rank-last td { background: rgba(248, 81, 73, 0.15); border-top: 1px solid rgba(248, 81, 73, 0.35); border-bottom: 1px solid rgba(248, 81, 73, 0.35); }
+        tr.svs-team-row td { font-weight: 800; color: var(--svs-bright-blue); background: rgba(0, 51, 153, 0.25); }
 
         .team-cell {
             display: flex;
@@ -472,7 +502,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 15px;
+            margin-top: 20px;
             flex-wrap: wrap;
             gap: 10px;
         }
@@ -483,84 +513,86 @@
             flex-wrap: wrap;
         }
         .visitor-counter-box {
-            background: #161b22;
+            background: #131c38;
             border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-color);
             display: flex;
             align-items: center;
             gap: 6px;
         }
-        .visitor-counter-box span { color: #ffffff; font-weight: bold; }
+        .visitor-counter-box span { color: var(--svs-bright-blue); }
 
         .chart-trigger-btn {
-            background: #21262d;
-            border: 1px solid var(--svs-bright-blue);
-            color: var(--svs-bright-blue);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: bold;
+            background: #131c38;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
             cursor: pointer;
-            text-transform: uppercase;
             transition: all 0.2s;
         }
-        .chart-trigger-btn:hover { background: var(--svs-bright-blue); color: #000; }
+        .chart-trigger-btn:hover { color: var(--svs-bright-blue); border-color: var(--svs-bright-blue); }
 
         #visitorChartContainer {
             display: none;
             width: 100%;
-            background: #161b22;
+            background: var(--card-inner);
             border: 1px solid var(--svs-bright-blue);
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 16px;
             margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 25px rgba(0, 51, 153, 0.2);
         }
         #visitorChartContainer h4 {
-            color: #ffffff;
-            font-size: 0.8rem;
+            color: var(--svs-bright-blue);
+            font-size: 0.85rem;
             text-transform: uppercase;
-            margin: 0 0 8px 0;
+            margin: 0 0 12px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .admin-card {
-            background: #161b22;
+            background: var(--card-inner);
             border: 1px solid var(--svs-bright-blue);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 18px;
             display: none;
+            box-shadow: 0 8px 25px rgba(0, 51, 153, 0.2);
         }
 
         .btn {
-            background: var(--primary-blue);
+            background: linear-gradient(90deg, var(--primary-blue), var(--svs-bright-blue));
             color: #ffffff;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
             font-size: 0.85rem;
             width: 100%;
             margin-top: 10px;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 51, 153, 0.3);
         }
-        .btn:hover { background: var(--primary-blue-hover); }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 51, 153, 0.5); }
 
         .btn-danger {
             background: transparent;
             border: none;
-            color: var(--accent-red);
+            color: #f85149;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
         .btn-edit {
             background: transparent;
@@ -575,8 +607,8 @@
             background: rgba(46, 160, 67, 0.2);
             border: 1px solid #3fb950;
             color: #3fb950;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             font-size: 0.75rem;
@@ -586,19 +618,19 @@
 
         .admin-box {
             display: none;
-            background: #0d1117;
+            background: #090e1f;
             border: 1px dashed var(--svs-bright-blue);
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 14px;
             margin-bottom: 15px;
         }
         .admin-box input, .admin-box select {
-            background: #161b22;
+            background: #131c38;
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
             margin-right: 6px;
             margin-bottom: 6px;
         }
@@ -615,7 +647,7 @@
     </div>
 
     <div class="subtitle" id="leagueSubtitle">Oberliga Niederrhein (OL1 / 2026) — OpenLigaDB Live-Daten</div>
-    <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">⚡ Web-App & Management: Jürgen Schützendorf</div>
+    <div style="text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px;">⚡ Web-App & Management: Jürgen Schützendorf</div>
 
     <!-- SV SCHERPENBERG — SAISON-AUSWERTUNG -->
     <div class="section-box">
@@ -624,7 +656,7 @@
             <div class="header-btn-group">
                 <button class="btn-modal-open" onclick="openTeamMatchesModal('SV Scherpenberg')">📅 Alle Spiele</button>
                 <button class="btn-modal-open" onclick="openLeagueScorersModal()">⚽ Torjägerliste</button>
-                <button class="btn-modal-open" style="background: #2ea043; color: #fff;" onclick="openSvsScorersModal()">⚽ SVS-Torschützen</button>
+                <button class="btn-modal-open" style="background: #3fb950; color: #fff;" onclick="openSvsScorersModal()">⚽ SVS-Torschützen</button>
             </div>
         </div>
         <div class="stats-grid" id="svsStatsGrid"></div>
@@ -657,11 +689,13 @@
 
     <!-- SPIELTAGS-KACHELN -->
     <div class="section-box">
-        <div class="section-header" id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</div>
+        <div class="section-header">
+            <span id="matchdayTableHeader">Spieltag 1 — Spiele & Ergebnisse</span>
+        </div>
         <div class="matchday-controls">
-            <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger Spieltag</button>
+            <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger</button>
             <strong id="matchdayDisplay" style="color: var(--svs-bright-blue); font-size: 1.1rem;">Spieltag 1</strong>
-            <button class="matchday-btn" onclick="changeMatchday(1)">Nächster Spieltag ▶</button>
+            <button class="matchday-btn" onclick="changeMatchday(1)">Nächster ▶</button>
         </div>
         <div class="matchday-tiles-grid" id="matchdayTilesContainer">
             <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 20px;">Lade Spieldaten von OpenLigaDB (OL1/2026)...</div>
@@ -671,7 +705,7 @@
     <!-- OBERLIGA-TABELLE -->
     <div class="section-box">
         <div class="section-header">Oberliga Niederrhein — Tabelle (Gesamt)</div>
-        <div style="font-size: 0.8rem; color: var(--text-color); margin-bottom: 12px; background: rgba(88, 166, 255, 0.08); padding: 10px 12px; border-radius: 6px; border-left: 3px solid var(--svs-bright-blue); display: flex; align-items: center; gap: 8px;">
+        <div style="font-size: 0.8rem; color: var(--text-color); margin-bottom: 14px; background: rgba(56, 139, 253, 0.1); padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(56, 139, 253, 0.3); display: flex; align-items: center; gap: 10px;">
             <span>💡</span>
             <span><strong>Tipp:</strong> Klicke in der Tabelle auf einen beliebigen Vereinsnamen, um alle Saisonspiele des jeweiligen Teams anzuzeigen!</span>
         </div>
@@ -749,7 +783,7 @@
                 </table>
             </div>
         </div>
-        <button class="btn-modal-open" style="margin-top: 15px; width: 100%; padding: 10px;" onclick="closeTeamMatchesModal()">Schließen</button>
+        <button class="btn" style="margin-top: 15px;" onclick="closeTeamMatchesModal()">Schließen</button>
     </div>
 </div>
 
@@ -757,9 +791,7 @@
 <div class="modal-overlay" id="leagueScorersModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
-                <span>⚽ Torjäger — Oberliga Niederrhein</span>
-            </div>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">⚽ Torjäger — Oberliga Niederrhein</div>
             <button class="btn-danger" onclick="closeLeagueScorersModal()">✕</button>
         </div>
         <div class="modal-body">
@@ -791,7 +823,7 @@
                 </table>
             </div>
         </div>
-        <button class="btn-modal-open" style="margin-top: 15px; width: 100%; padding: 10px;" onclick="closeLeagueScorersModal()">Schließen</button>
+        <button class="btn" style="margin-top: 15px;" onclick="closeLeagueScorersModal()">Schließen</button>
     </div>
 </div>
 
@@ -799,9 +831,7 @@
 <div class="modal-overlay" id="svsScorersModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff; display: flex; align-items: center; gap: 10px;">
-                <span>⚽ SVS Torjäger — SV Scherpenberg</span>
-            </div>
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">⚽ SVS Torjäger — SV Scherpenberg</div>
             <button class="btn-danger" onclick="closeSvsScorersModal()">✕</button>
         </div>
         <div class="modal-body">
@@ -832,7 +862,7 @@
                 </table>
             </div>
         </div>
-        <button class="btn-modal-open" style="margin-top: 15px; width: 100%; padding: 10px;" onclick="closeSvsScorersModal()">Schließen</button>
+        <button class="btn" style="margin-top: 15px;" onclick="closeSvsScorersModal()">Schließen</button>
     </div>
 </div>
 
@@ -959,7 +989,7 @@
                 rawGoals.forEach(g => {
                     let name = g.goalGetterName || "Tor";
                     let min = (g.matchMinute !== undefined && g.matchMinute !== null) ? g.matchMinute : '';
-                    let minStr = min !== '' ? `${min}''` : '';
+                    let minStr = min !== '' ? `${min}'` : '';
                     
                     let currH = g.scoreTeam1 ?? (prevH + (g.teamID === matchData.team1?.teamID ? 1 : 0));
                     let currA = g.scoreTeam2 ?? (prevA + (g.teamID === matchData.team2?.teamID ? 1 : 0));
@@ -987,7 +1017,9 @@
                     prevA = currA;
 
                     let scoringTeam = isHomeGoal ? homeTeamName : awayTeamName;
-                    goalsList.push(`⚽ <strong>[${currH}:${currA}]</strong> <strong>${scoringTeam}:</strong> ${name} (${minStr})`);
+                    let goalClass = isHomeGoal ? 'goal-item-home' : 'goal-item-away';
+                    
+                    goalsList.push(`<span class="${goalClass}">⚽ [${currH}:${currA}] ${scoringTeam}: ${name} (${minStr})</span>`);
                 });
             }
             detailedGoalsCache[matchID] = goalsList;
@@ -1043,18 +1075,18 @@
                 datasets: [{
                     label: 'Seitenaufrufe',
                     data: dataValues,
-                    backgroundColor: '#58a6ff',
-                    borderColor: '#30363d',
+                    backgroundColor: '#388bfd',
+                    borderColor: '#1f305e',
                     borderWidth: 1,
-                    borderRadius: 4
+                    borderRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { ticks: { color: '#8b949e', font: { size: 10 } }, grid: { color: '#30363d' } },
-                    y: { ticks: { color: '#8b949e', font: { size: 10 }, stepSize: 1 }, grid: { color: '#30363d' }, beginAtZero: true }
+                    x: { ticks: { color: '#8fa3bf', font: { size: 10 } }, grid: { color: '#1f305e' } },
+                    y: { ticks: { color: '#8fa3bf', font: { size: 10 }, stepSize: 1 }, grid: { color: '#1f305e' }, beginAtZero: true }
                 }
             }
         });
@@ -1242,7 +1274,6 @@
             let isSvsMatch = (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg");
             let isDraw = hasResult && (m.homeScore === m.awayScore);
 
-            // Status Badge ermitteln
             let statusBadgeHtml = `<span class="match-status-badge">ANSETZUNG</span>`;
             if (hasResult) {
                 statusBadgeHtml = `<span class="match-status-badge ended">ENDE</span>`;
@@ -1337,7 +1368,7 @@
         document.getElementById('svsStatsGrid').innerHTML = `
             <div class="stat-card"><div class="stat-label">Spiele</div><div class="stat-value">${played}</div></div>
             <div class="stat-card"><div class="stat-label">Siege</div><div class="stat-value" style="color: #3fb950;">${won}</div></div>
-            <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: #e3b341;">${draw}</div></div>
+            <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: var(--s04-gold);">${draw}</div></div>
             <div class="stat-card"><div class="stat-label">Niederlagen</div><div class="stat-value" style="color: #f85149;">${lost}</div></div>
             <div class="stat-card"><div class="stat-label">Tore</div><div class="stat-value">${goalsFor}:${goalsAgainst}</div></div>
             <div class="stat-card"><div class="stat-label">Punkte</div><div class="stat-value">${points}</div></div>
@@ -1483,11 +1514,11 @@
             tr.innerHTML = `
                 <td style="text-align: center; font-weight: bold; color: var(--svs-bright-blue);">${rankDisplay}</td>
                 <td>
-                    <div style="font-weight: bold; color: #ffffff;">${s.name}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${teamDisplayHtml}</div>
+                    <div style="font-weight: 800; color: #ffffff; font-size: 0.95rem;">${s.name}</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">${teamDisplayHtml}</div>
                 </td>
                 <td style="text-align: center; color: var(--text-color);">${s.spiele}</td>
-                <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.1rem;">${s.tore}</td>
+                <td style="text-align: center; font-weight: bold; color: #3fb950; font-size: 1.15rem;">${s.tore}</td>
                 <td style="text-align: center; white-space: nowrap;">${actionsHtml}</td>
             `;
             tbody.appendChild(tr);
@@ -1636,14 +1667,15 @@
 
         sorted.forEach((s, idx) => {
             let tr = document.createElement('tr');
-            if (idx === 0) tr.classList.add('rank-first');
-            else if (idx >= sorted.length - 3 && sorted.length > 3) tr.classList.add('rank-last');
+            let rank = idx + 1;
+            if (rank <= 1) tr.classList.add('rank-first');
+            else if (rank >= sorted.length - 2 && sorted.length > 3) tr.classList.add('rank-last');
             if (s.name === "SV Scherpenberg") tr.classList.add('svs-team-row');
 
             let diff = s.goalsFor - s.goalsAgainst;
 
             tr.innerHTML = `
-                <td><strong>${idx + 1}.</strong></td>
+                <td><strong>${rank}.</strong></td>
                 <td>
                     <div class="team-cell">
                         <img src="${getTeamLogoUrl(s.name)}" alt="${s.name}" class="team-logo">
