@@ -292,7 +292,7 @@
             align-items: center;
         }
         .dash-card-content {
-            font-size: 0.95krem;
+            font-size: 0.95rem;
             color: var(--text-color);
             font-weight: 500;
         }
@@ -455,7 +455,6 @@
             flex-direction: column;
             gap: 4px;
         }
-        /* Farben für Ticker-Tore */
         .goal-item-home { color: var(--goal-cyan); }
         .goal-item-away { color: var(--s04-gold); }
 
@@ -866,6 +865,37 @@
     </div>
 </div>
 
+<!-- SPIELER BEARBEITEN MODAL -->
+<div class="modal-overlay" id="editScorerModal">
+    <div class="modal-card" style="max-width: 400px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;" id="editModalTitle">✏️ Spieler bearbeiten</div>
+            <button class="btn-danger" onclick="closeEditModal()">✕</button>
+        </div>
+        <div class="modal-body" style="overflow: visible;">
+            <input type="hidden" id="editPlayerId">
+            <input type="hidden" id="editOnlySvs">
+            
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 4px;">SPIELERNAME</label>
+                <input type="text" id="editPlayerName" style="width: 100%; background: #131c38; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem;">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 4px;">SPIELE (SP)</label>
+                    <input type="number" id="editPlayerSpiele" min="0" max="34" style="width: 100%; background: #131c38; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem; text-align: center;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; display: block; margin-bottom: 4px;">TORE</label>
+                    <input type="number" id="editPlayerTore" min="0" max="50" style="width: 100%; background: #131c38; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; font-size: 0.9rem; text-align: center;">
+                </div>
+            </div>
+        </div>
+        <button class="btn" onclick="saveEditedScorer()">Änderungen speichern</button>
+    </div>
+</div>
+
 <script>
     const OPENDB_SHORTCUT = "OL1";
     const OPENDB_SEASON = "2026";
@@ -1181,7 +1211,6 @@
         let pastMatches = allSvsMatches.filter(m => (m.homeScore !== null && m.homeScore !== undefined) || m.matchIsFinished);
         let lastMatch = pastMatches.length > 0 ? pastMatches[pastMatches.length - 1] : null;
 
-        // 1. Nächstes Spiel Widget mit Countdown
         let nextWidget = document.getElementById('nextMatchWidget');
         if (nextMatch && nextMatch.dateTime) {
             nextMatchDateTime = new Date(nextMatch.dateTime);
@@ -1193,7 +1222,6 @@
             nextMatchDateTime = null;
         }
 
-        // 2. Letztes Pflichtspiel Widget
         let lastWidget = document.getElementById('lastMatchWidget');
         if (lastMatch) {
             let dt = lastMatch.date ? lastMatch.date.split('-').reverse().join('.') : '';
@@ -1202,7 +1230,6 @@
             lastWidget.innerHTML = "Noch kein beendetes Spiel.";
         }
 
-        // 3. Formkurve Widget (Letzte 12 Spiele)
         let formWidget = document.getElementById('formCurveWidget');
         if (pastMatches.length > 0) {
             let last12 = pastMatches.slice(-12);
@@ -1219,7 +1246,6 @@
             formWidget.innerHTML = '<span style="font-size:0.85rem; color:var(--text-muted);">Noch keine beendeten Spiele</span>';
         }
 
-        // 4. Heim vs. Auswärts Widget
         let homeW = {p:0, s:0, u:0, n:0, pts:0};
         let awayW = {p:0, s:0, u:0, n:0, pts:0};
         pastMatches.forEach(m => {
@@ -1503,7 +1529,7 @@
             if (isAdminUnlocked) {
                 actionsHtml = `
                     <button class="btn-plus" onclick="addGoalToPlayer(${s.id}, ${s.tore}, ${onlySvs})" title="1 Tor hinzufügen (+1)">+1 ⚽</button>
-                    <button class="btn-edit" onclick="editScorer(${s.id}, '${s.name}', ${s.tore}, ${onlySvs})" title="Tore manuell anpassen">✏️</button>
+                    <button class="btn-edit" onclick="openEditModal(${s.id}, '${s.name}', ${s.spiele}, ${s.tore}, ${onlySvs})" title="Spielerdaten anpassen">✏️</button>
                     <button class="btn-danger" onclick="deleteScorerFromSupabase(${s.id}, ${onlySvs})" title="Löschen">🗑️</button>
                 `;
             }
@@ -1539,23 +1565,40 @@
         }
     }
 
-    async function editScorer(id, currentName, currentGoals, onlySvs) {
-        let input = prompt(`Neue Anzahl Tore für ${currentName} eingeben:`, currentGoals);
-        if (input === null) return;
-        let newGoals = parseInt(input);
-        if (isNaN(newGoals) || newGoals < 0) {
-            alert("Bitte eine gültige Zahl eingeben!");
+    function openEditModal(id, name, spiele, tore, onlySvs) {
+        document.getElementById('editPlayerId').value = id;
+        document.getElementById('editPlayerName').value = name;
+        document.getElementById('editPlayerSpiele').value = spiele;
+        document.getElementById('editPlayerTore').value = tore;
+        document.getElementById('editOnlySvs').value = onlySvs;
+        document.getElementById('editScorerModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editScorerModal').style.display = 'none';
+    }
+
+    async function saveEditedScorer() {
+        let id = document.getElementById('editPlayerId').value;
+        let name = document.getElementById('editPlayerName').value.trim();
+        let spiele = parseInt(document.getElementById('editPlayerSpiele').value);
+        let tore = parseInt(document.getElementById('editPlayerTore').value);
+        let onlySvs = document.getElementById('editOnlySvs').value === 'true';
+
+        if (!name || isNaN(spiele) || isNaN(tore)) {
+            alert("Bitte gültige Werte eingeben.");
             return;
         }
 
         let { error } = await supabaseClient
             .from('oberliga_torschuetzen')
-            .update({ tore: newGoals })
+            .update({ name: name, spiele: spiele, tore: tore })
             .eq('id', id);
 
         if (error) {
             alert("Fehler beim Speichern: " + error.message);
         } else {
+            closeEditModal();
             await loadScorersFromSupabase(onlySvs);
         }
     }
@@ -1698,9 +1741,11 @@
         let modal1 = document.getElementById('teamMatchesModal');
         let modal2 = document.getElementById('leagueScorersModal');
         let modal3 = document.getElementById('svsScorersModal');
+        let modal4 = document.getElementById('editScorerModal');
         if (e.target === modal1) closeTeamMatchesModal();
         if (e.target === modal2) closeLeagueScorersModal();
         if (e.target === modal3) closeSvsScorersModal();
+        if (e.target === modal4) closeEditModal();
     }
 
     initApp();
