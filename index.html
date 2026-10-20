@@ -266,10 +266,10 @@
             margin-bottom: 14px;
         }
 
-        /* 3ER GRID KACHELN */
+        /* 4ER GRID KACHELN */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -279,6 +279,9 @@
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .dash-card-title {
             font-size: 0.8rem;
@@ -667,7 +670,7 @@
         <div class="dash-card-content" id="formCurveWidget" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">Noch keine beendeten Spiele</div>
     </div>
 
-    <!-- 3ER GRID KACHELN -->
+    <!-- 4ER GRID KACHELN -->
     <div class="dashboard-grid">
         <!-- 1. Nächstes Spiel mit Countdown -->
         <div class="dash-card">
@@ -679,10 +682,15 @@
             <div class="dash-card-title">🏁 Letztes Pflichtspiel</div>
             <div class="dash-card-content" id="lastMatchWidget">Wird geladen...</div>
         </div>
-        <!-- 3. Heim vs. Auswärts -->
+        <!-- 3. Form-König (letzte 5 Spiele) -->
         <div class="dash-card">
-            <div class="dash-card-title">🏟️ Heim vs. Auswärts</div>
-            <div class="dash-card-content" id="homeAwayWidget">Heim: 0S - 0U - 0N (0 Pkt)<br>Auswärts: 0S - 0U - 0N (0 Pkt)</div>
+            <div class="dash-card-title">🔥 Form-König</div>
+            <div class="dash-card-content" id="formKingWidget">Wird berechnet...</div>
+        </div>
+        <!-- 4. Top 3 Torschützen -->
+        <div class="dash-card">
+            <div class="dash-card-title">🎯 Top 3 Torschützen</div>
+            <div class="dash-card-content" id="topScorersWidget">Lade Torjäger...</div>
         </div>
     </div>
 
@@ -1165,6 +1173,7 @@
         leagueData.currentMatchday = determinedMatchday;
         renderAll();
         populateTeamSelect();
+        updateTopScorersWidget();
     }
 
     function populateTeamSelect() {
@@ -1192,12 +1201,69 @@
         updateWidgets();
     }
 
+    async function updateTopScorersWidget() {
+        let container = document.getElementById('topScorersWidget');
+        try {
+            let { data, error } = await supabaseClient
+                .from('oberliga_torschuetzen')
+                .select('*')
+                .order('tore', { ascending: false })
+                .limit(3);
+
+            if (error || !data || data.length === 0) {
+                container.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Keine Torschützen eingetragen</span>';
+                return;
+            }
+
+            let html = '<div style="display:flex; flex-direction:column; gap:6px;">';
+            data.forEach((s, idx) => {
+                let medals = ['🥇', '🥈', '🥉'];
+                let teamLogo = getTeamLogoUrl(s.team);
+                html.innerHTML = '';
+                html += `
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem;">
+                        <div style="display:flex; align-items:center; gap:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            <span>${medals[idx]}</span>
+                            <img src="${teamLogo}" class="team-logo" style="width:14px; height:14px;" title="${s.team}">
+                            <strong style="color:#ffffff;" title="${s.name}">${s.name}</strong>
+                        </div>
+                        <strong style="color:#3fb950; flex-shrink:0;">${s.tore} ⚽</strong>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            // Re-map proper html output for all 3 items
+            let listHtml = '<div style="display:flex; flex-direction:column; gap:6px;">';
+            data.forEach((s, idx) => {
+                let medals = ['🥇', '🥈', '🥉'];
+                let teamLogo = getTeamLogoUrl(s.team);
+                listHtml += `
+                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem;">
+                        <div style="display:flex; align-items:center; gap:5px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                            <span>${medals[idx]}</span>
+                            <img src="${teamLogo}" class="team-logo" style="width:14px; height:14px;" title="${s.team}">
+                            <span style="color:#ffffff; font-weight:600;" title="${s.name}">${s.name}</span>
+                        </div>
+                        <span style="color:#3fb950; font-weight:bold; flex-shrink:0;">${s.tore} ⚽</span>
+                    </div>
+                `;
+            });
+            listHtml += '</div>';
+            container.innerHTML = listHtml;
+        } catch (e) {
+            container.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Fehler beim Laden</span>';
+        }
+    }
+
     function updateWidgets() {
         let allSvsMatches = [];
+        let allMatches = [];
         for (let mDay in leagueData.matches) {
             let matches = leagueData.matches[mDay];
             if (Array.isArray(matches)) {
                 matches.forEach(m => {
+                    allMatches.push(Object.assign({ matchday: parseInt(mDay) }, m));
                     if (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg") {
                         allSvsMatches.push(Object.assign({ matchday: parseInt(mDay) }, m));
                     }
@@ -1205,6 +1271,7 @@
             }
         }
         allSvsMatches.sort((a, b) => new Date(a.dateTime || 0) - new Date(b.dateTime || 0));
+        allMatches.sort((a, b) => new Date(a.dateTime || 0) - new Date(b.dateTime || 0));
 
         let now = new Date();
         let nextMatch = allSvsMatches.find(m => new Date(m.dateTime || 0) >= now && (!m.homeScore && m.homeScore !== 0));
@@ -1246,19 +1313,52 @@
             formWidget.innerHTML = '<span style="font-size:0.85rem; color:var(--text-muted);">Noch keine beendeten Spiele</span>';
         }
 
-        let homeW = {p:0, s:0, u:0, n:0, pts:0};
-        let awayW = {p:0, s:0, u:0, n:0, pts:0};
-        pastMatches.forEach(m => {
-            let isHome = m.home === "SV Scherpenberg";
-            let myG = isHome ? m.homeScore : m.awayScore;
-            let oppG = isHome ? m.awayScore : m.homeScore;
-            let obj = isHome ? homeW : awayW;
-            obj.p++;
-            if (myG > oppG) { obj.s++; obj.pts += 3; }
-            else if (myG === oppG) { obj.u++; obj.pts += 1; }
-            else { obj.n++; }
+        // Form-König Berechnung (letzte 5 Spiele aller Teams)
+        let teamStats = {};
+        allMatches.forEach(m => {
+            if (m.homeScore !== null && m.homeScore !== undefined && m.matchIsFinished) {
+                let h = m.home, a = m.away;
+                if (!teamStats[h]) teamStats[h] = { name: h, matches: [], pts: 0, gd: 0 };
+                if (!teamStats[a]) teamStats[a] = { name: a, matches: [], pts: 0, gd: 0 };
+
+                teamStats[h].matches.push({ date: new Date(m.dateTime || 0), pts: m.homeScore > m.awayScore ? 3 : (m.homeScore === m.awayScore ? 1 : 0), gf: m.homeScore, ga: m.awayScore, gd: m.homeScore - m.awayScore });
+                teamStats[a].matches.push({ date: new Date(m.dateTime || 0), pts: m.awayScore > m.homeScore ? 3 : (m.awayScore === m.homeScore ? 1 : 0), gf: m.awayScore, ga: m.homeScore, gd: m.awayScore - m.homeScore });
+            }
         });
-        document.getElementById('homeAwayWidget').innerHTML = `Heim: ${homeW.s}S - ${homeW.u}U - ${homeW.n}N (${homeW.pts} Pkt)<br>Auswärts: ${awayW.s}S - ${awayW.u}U - ${awayW.n}N (${awayW.pts} Pkt)`;
+
+        let sortedFormTeams = Object.values(teamStats).map(t => {
+            t.matches.sort((a, b) => b.date - a.date);
+            let last5 = t.matches.slice(0, 5);
+            let totalPts = last5.reduce((sum, m) => sum + m.pts, 0);
+            let totalGd = last5.reduce((sum, m) => sum + m.gd, 0);
+            let totalGf = last5.reduce((sum, m) => sum + m.gf, 0);
+            let totalGa = last5.reduce((sum, m) => sum + m.ga, 0);
+            let formString = last5.map(m => m.pts === 3 ? 'S' : (m.pts === 1 ? 'U' : 'N')).join('');
+            return { name: t.name, pts: totalPts, gd: totalGd, gf: totalGf, ga: totalGa, form: formString, count: last5.length };
+        }).filter(t => t.count > 0);
+
+        sortedFormTeams.sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd - a.gd);
+        let formKing = sortedFormTeams.length > 0 ? sortedFormTeams[0] : null;
+
+        let formKingWidget = document.getElementById('formKingWidget');
+        if (formKing) {
+            let kingLogo = getTeamLogoUrl(formKing.name);
+            let logoHtml = kingLogo ? `<img src="${kingLogo}" class="team-logo" style="width:18px; height:18px; vertical-align:middle; margin-right:4px;" alt="Logo">` : '';
+
+            formKingWidget.innerHTML = `
+                <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                    ${logoHtml}
+                    <strong style="color:#ffffff; font-size:0.85rem;" title="${formKing.name}">${formKing.name}</strong>
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); display:flex; flex-direction:column; gap:2px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Punkte (L5):</span> <strong style="color:var(--svs-bright-blue);">${formKing.pts} Pkt</strong></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Tore (L5):</span> <strong style="color:var(--s04-gold);">${formKing.gf}:${formKing.ga}</strong></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Serie:</span> <strong style="color:#3fb950; letter-spacing:0.5px;">${formKing.form}</strong></div>
+                </div>
+            `;
+        } else {
+            formKingWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine Form-Daten</span>';
+        }
     }
 
     function updateCountdown() {
@@ -1562,6 +1662,7 @@
             alert("Fehler beim Aktualisieren: " + error.message);
         } else {
             await loadScorersFromSupabase(onlySvs);
+            updateTopScorersWidget();
         }
     }
 
@@ -1600,6 +1701,7 @@
         } else {
             closeEditModal();
             await loadScorersFromSupabase(onlySvs);
+            updateTopScorersWidget();
         }
     }
 
@@ -1640,6 +1742,7 @@
             document.getElementById('manualPlayerNameSvs').value = '';
             await loadScorersFromSupabase(true);
         }
+        updateTopScorersWidget();
     }
 
     async function deleteScorerFromSupabase(id, onlySvs) {
@@ -1657,6 +1760,7 @@
         }
 
         await loadScorersFromSupabase(onlySvs);
+        updateTopScorersWidget();
     }
 
     function renderTable() {
