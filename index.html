@@ -49,6 +49,76 @@
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 51, 153, 0.2);
         }
 
+        /* LAUFBAND / TICKER STYLES */
+        .ticker-wrapper {
+            width: 100%;
+            background: linear-gradient(90deg, #070e27 0%, #0d1a40 50%, #070e27 100%);
+            border: 1px solid var(--svs-bright-blue);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            height: 38px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(56, 139, 253, 0.3);
+        }
+        .ticker-label {
+            background: linear-gradient(135deg, var(--primary-blue), var(--svs-bright-blue));
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0 14px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            z-index: 2;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+            border-right: 1px solid var(--svs-bright-blue);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+        }
+        .ticker-content-box {
+            overflow: hidden;
+            white-space: nowrap;
+            flex: 1;
+            position: relative;
+        }
+        .ticker-track {
+            display: inline-block;
+            white-space: nowrap;
+            animation: ticker-scroll 85s linear infinite;
+            font-size: 0.85rem;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+        .ticker-item {
+            display: inline-block;
+            padding: 0 30px;
+            color: #ffffff;
+        }
+        .ticker-item span {
+            color: var(--s04-gold);
+            font-weight: bold;
+            margin-left: 6px;
+        }
+        .ticker-highlight-svs {
+            background: rgba(56, 139, 253, 0.25);
+            border-top: 1px solid var(--svs-bright-blue);
+            border-bottom: 1px solid var(--svs-bright-blue);
+            padding-top: 3px;
+            padding-bottom: 3px;
+            border-radius: 4px;
+        }
+        @keyframes ticker-scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
         .banner-box {
             background: #070b19;
             border: 1px solid var(--border-color);
@@ -641,6 +711,16 @@
 <body>
 
 <div class="container">
+    <!-- LAUFBAND / TICKER OBEN -->
+    <div class="ticker-wrapper">
+        <div class="ticker-label" id="tickerLabel">⚽ Ticker</div>
+        <div class="ticker-content-box">
+            <div class="ticker-track" id="tickerTrack">
+                <span class="ticker-item">Lade aktuelle Spielstände und Tore...</span>
+            </div>
+        </div>
+    </div>
+
     <div class="banner-box">
         <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/banner%20sv%20scherpenberg.png" alt="SV Scherpenberg Banner" class="banner-image">
         <div class="banner-footer">
@@ -948,6 +1028,7 @@
 
     let detailedGoalsCache = {};
     let nextMatchDateTime = null;
+    let latestLiveGoalsTicker = [];
 
     function getTeamLogoUrl(teamName) {
         let logoUrl = VEREINS_LOGOS[teamName];
@@ -966,6 +1047,7 @@
             if (Array.isArray(data) && data.length > 0) {
                 let teamsSet = new Set();
                 let matchesMap = {};
+                latestLiveGoalsTicker = [];
 
                 data.forEach(m => {
                     let mDay = m.group?.groupOrderID || 1;
@@ -987,6 +1069,10 @@
                         }
                     }
 
+                    let matchDt = m.matchDateTime ? new Date(m.matchDateTime) : null;
+                    let now = new Date();
+                    let isLive = matchDt && matchDt.toDateString() === now.toDateString() && now >= matchDt && !m.matchIsFinished && homeScore !== null;
+
                     matchesMap[mDay].push({
                         matchID: m.matchID,
                         home: homeTeam,
@@ -996,7 +1082,8 @@
                         homeScore: homeScore,
                         awayScore: awayScore,
                         matchIsFinished: m.matchIsFinished || (homeScore !== null && awayScore !== null),
-                        dateTime: m.matchDateTime
+                        dateTime: m.matchDateTime,
+                        isLive: isLive
                     });
                 });
 
@@ -1058,12 +1145,61 @@
                     let goalClass = isHomeGoal ? 'goal-item-home' : 'goal-item-away';
                     
                     goalsList.push(`<span class="${goalClass}">⚽ [${currH}:${currA}] ${scoringTeam}: ${name} (${minStr})</span>`);
+
+                    if (matchData.matchIsFinished === false) {
+                        let isSvsMatch = (homeTeamName === "SV Scherpenberg" || awayTeamName === "SV Scherpenberg");
+                        let highlightClass = isSvsMatch ? ' ticker-highlight-svs' : '';
+                        latestLiveGoalsTicker.push(`<span class="ticker-item${highlightClass}">⚽ ${scoringTeam}: ${name} (${minStr}) <span>${homeTeamName} ${currH}:${currA} ${awayTeamName}</span></span>`);
+                    }
                 });
             }
             detailedGoalsCache[matchID] = goalsList;
             return goalsList;
         } catch (e) {
             return [];
+        }
+    }
+
+    function updateTicker() {
+        let tickerItems = [];
+        let labelText = "⚽ Ticker";
+
+        if (latestLiveGoalsTicker.length > 0) {
+            tickerItems = latestLiveGoalsTicker;
+            labelText = "⚽ LIVE-TORE";
+        } else {
+            // Ermittle den letzten gespielten Spieltag (bei dem Spiele beendet wurden)
+            let tickerMatchday = 1;
+            for (let mDay = 1; mDay <= 34; mDay++) {
+                let matches = leagueData.matches[mDay] || [];
+                let hasFinished = matches.some(m => m.matchIsFinished);
+                if (hasFinished) {
+                    tickerMatchday = mDay;
+                }
+            }
+
+            let matches = leagueData.matches[tickerMatchday] || [];
+            labelText = `⚽ SPIELTAG ${tickerMatchday} (ERGEBNISSE)`;
+
+            matches.forEach(m => {
+                let score = (m.homeScore !== null && m.homeScore !== undefined) ? `${m.homeScore}:${m.awayScore}` : 'vs';
+                let status = m.isLive ? '🔴 LIVE' : (m.matchIsFinished ? 'Endstand' : m.time || '');
+                
+                let isSvsMatch = (m.home === "SV Scherpenberg" || m.away === "SV Scherpenberg");
+                let highlightClass = isSvsMatch ? ' ticker-highlight-svs' : '';
+                
+                tickerItems.push(`<span class="ticker-item${highlightClass}">${m.home} - ${m.away} <span>${score}</span> (${status})</span>`);
+            });
+        }
+
+        const tickerLabelElem = document.getElementById('tickerLabel');
+        if (tickerLabelElem) {
+            tickerLabelElem.textContent = labelText;
+        }
+
+        const tickerTrack = document.getElementById('tickerTrack');
+        if (tickerTrack) {
+            tickerTrack.innerHTML = tickerItems.length > 0 ? tickerItems.join('') : `<span class="ticker-item">Keine Spiele im Ticker verfügbar.</span>`;
         }
     }
 
@@ -1199,6 +1335,7 @@
         renderTable();
         renderSvbStats();
         updateWidgets();
+        updateTicker();
     }
 
     async function updateTopScorersWidget() {
@@ -1215,25 +1352,6 @@
                 return;
             }
 
-            let html = '<div style="display:flex; flex-direction:column; gap:6px;">';
-            data.forEach((s, idx) => {
-                let medals = ['🥇', '🥈', '🥉'];
-                let teamLogo = getTeamLogoUrl(s.team);
-                html.innerHTML = '';
-                html += `
-                    <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem;">
-                        <div style="display:flex; align-items:center; gap:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                            <span>${medals[idx]}</span>
-                            <img src="${teamLogo}" class="team-logo" style="width:14px; height:14px;" title="${s.team}">
-                            <strong style="color:#ffffff;" title="${s.name}">${s.name}</strong>
-                        </div>
-                        <strong style="color:#3fb950; flex-shrink:0;">${s.tore} ⚽</strong>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            
-            // Re-map proper html output for all 3 items
             let listHtml = '<div style="display:flex; flex-direction:column; gap:6px;">';
             data.forEach((s, idx) => {
                 let medals = ['🥇', '🥈', '🥉'];
@@ -1313,7 +1431,6 @@
             formWidget.innerHTML = '<span style="font-size:0.85rem; color:var(--text-muted);">Noch keine beendeten Spiele</span>';
         }
 
-        // Form-König Berechnung (letzte 5 Spiele aller Teams)
         let teamStats = {};
         allMatches.forEach(m => {
             if (m.homeScore !== null && m.homeScore !== undefined && m.matchIsFinished) {
